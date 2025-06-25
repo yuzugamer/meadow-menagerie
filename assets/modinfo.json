@@ -1,0 +1,11 @@
+{
+  "id": "yuzugamer.storymenagerie",
+  "name": "Meadow Story Menagerie",
+  "version": "0.5.0",
+  "hide_version": true,
+  "authors": "yuzugamer",
+  "description": "Rain Meadow's story mode with extra cast variety",
+  "requirements": ["henpemaz_rainmeadow"],
+  "requirements_names": ["Rain Meadow"],
+  "tags": [ "Game Modes", "Creatures", "Base", "Downpour", "Watcher" ]
+}
