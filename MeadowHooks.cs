@@ -34,6 +34,7 @@ public static class MeadowHooks
             new ILHook(typeof(MeadowCreatureData.State).GetConstructor(new Type[] { typeof(MeadowCreatureData) }), IL_MeadowCreatureData_State_ctor);
             new ILHook(typeof(MeadowCreatureData.State).GetMethod("ReadTo", BindingFlags.Instance | BindingFlags.Public), IL_MeadowCreatureData_State_ReadTo);
             new ILHook(typeof(OnlinePlayerDeathBump).GetConstructor(new Type[] { typeof(PlayerSpecificOnlineHud), typeof(SlugcatCustomization) }), IL_OnlinePlayerDeathBump);
+            new Hook(typeof(StoryModeExtensions).GetMethod(nameof(StoryModeExtensions.FriendlyFireSafetyCandidate), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic), On_StoryModeExtensions_FriendlyFireSafetyCandidate);
         }
         catch (Exception ex)
         {
@@ -474,5 +475,18 @@ public static class MeadowHooks
         {
             StoryMenagerie.LogError(ex);
         }
+    }
+
+    public static bool On_StoryModeExtensions_FriendlyFireSafetyCandidate(Func<PhysicalObject, bool> orig, PhysicalObject creature)
+    {
+        if (OnlineManager.lobby == null || OnlineManager.lobby.gameMode is not MenagerieGameMode menagerie)
+        {
+            return orig(creature);
+        }
+        if ((creature is Player p && !p.isNPC) || (creature is Creature crit && CreatureController.creatureControllers.TryGetValue(crit, out var _)))
+        {
+            return !menagerie.friendlyFire;
+        }
+        return false;
     }
 }

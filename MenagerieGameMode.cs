@@ -100,15 +100,16 @@ public class MenagerieGameMode : StoryGameMode
         RainMeadow.RainMeadow.DebugMe();
         RainMeadow.RainMeadow.sSpawningAvatar = true;
         AbstractCreature abstractCreature;
+        var id = new EntityID(-1, 0);
+        id.altSeed = critID;
+        abstractCreature = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(selectedCreature), null, location, id);
         if (selectedCreature == CreatureTemplate.Type.Slugcat)
         {
-            abstractCreature = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate("Slugcat"), null, location, new EntityID(-1, 0));
             abstractCreature.state = new PlayerState(abstractCreature, 0, avatarSettings.playingAs, false);
             game.session.AddPlayer(abstractCreature);
         }
         else
         {
-            abstractCreature = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(selectedCreature), null, location, new EntityID(-1, critID));
             game.GetStorySession.playerSessionRecords[0] = new PlayerSessionRecord(0);
             game.GetStorySession.playerSessionRecords[0].wokeUpInRegion = game.world.region.name;
             //StoryCreatureController.AddPlayer(game.session, abstractCreature);
@@ -129,7 +130,7 @@ public class MenagerieGameMode : StoryGameMode
 
     public override void ConfigureAvatar(OnlineCreature onlineCreature)
     {
-        if (selectedCreature != CreatureTemplate.Type.Slugcat || (ModManager.MSC && selectedCreature == MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC)) avatarSettings.wearingCape = false;
+        if (selectedCreature != CreatureTemplate.Type.Slugcat && (!ModManager.MSC || selectedCreature != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC)) avatarSettings.wearingCape = false;
         base.ConfigureAvatar(onlineCreature);
     }
 

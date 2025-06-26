@@ -53,6 +53,13 @@ public static class IDManager
                 new (4624, "Starlight"),
                 new (5526, "Dino")
                 ]);
+				
+			if (ModManager.DLCShared) {
+				presets.Add("ZoopLizard", [
+                new(0, "Default"),
+                new(7789, "Hurricane")
+                ]);
+			}
 
             List<KeyValuePair<int, string>> scavyTemplate = [
                 new(0, "Default"),

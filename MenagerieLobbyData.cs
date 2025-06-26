@@ -7,8 +7,6 @@ namespace StoryMenagerie;
 
 public class MenagerieLobbyData : OnlineResource.ResourceData
 {
-    public MenagerieLobbyData() { }
-
     public override ResourceDataState MakeState(OnlineResource resource) => new State(this, resource);
 
     public class State : ResourceDataState
