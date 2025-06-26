@@ -36,30 +36,65 @@ public class StoryNoodleController : NoodleController
         if (input[0].AnyDirectionalInput)
         {
             worm.controlledCharge = new Vector2((float)input[0].x, (float)input[0].y) * 80f;
-        } else
+        }
+        else
         {
             worm.controlledCharge = worm.lookDir * 80f;
         }
-        /*Creature creature = null;
+
+        // auto-aim wild creatures
+        Creature creature = null;
         float num = float.MaxValue;
         float current = Custom.VecToDeg(worm.controlledCharge);
-        for (int i = 0; i < worm.abstractCreature.Room.creatures.Count; i++)
+        HashSet<AbstractCreature> nonPlayers = new HashSet<AbstractCreature>(); // I've heard hashsets are faster, so why not
+        foreach (var critter in worm.abstractCreature.Room.creatures) // find which creatures in the room are not players
         {
-            if (worm.abstractCreature != worm.abstractCreature.Room.creatures[i] && worm.abstractCreature.Room.creatures[i].realizedCreature != null)
+            // this is oh so simple but sadly only finds slugcat players
+            //if (critter.realizedCreature is not Player)
+            //{
+            //    nonPlayers.Add(critter);
+            //}
+
+            // juggling types like this to find IDs is slightly less simple but finds non-slugcat players just fine (at least according to my quick 2 minute test)
+            // maybe there's a more elegant way to do this?
+            bool isPlayer = false;
+            foreach (var playerAvatar in OnlineManager.lobby.playerAvatars)
             {
-                float target = Custom.AimFromOneVectorToAnother(worm.bodyChunks[1].pos, worm.abstractCreature.Room.creatures[i].realizedCreature.mainBodyChunk.pos);
-                float num2 = Custom.Dist(worm.bodyChunks[1].pos, worm.abstractCreature.Room.creatures[i].realizedCreature.mainBodyChunk.pos);
+                var onlineEntity = playerAvatar.Value.FindEntity(true);
+                if (onlineEntity is OnlinePhysicalObject onlinePhysicalPlayer)
+                {
+                    var abstractPhysicalPlayer = onlinePhysicalPlayer.apo;
+                    if (abstractPhysicalPlayer.ID == critter.ID)
+                    {
+                        isPlayer = true;
+                        break;
+                    }
+                }
+            }
+            if (!isPlayer)
+            {
+                nonPlayers.Add(critter);
+            }
+        }
+        foreach (var nonPlayer in nonPlayers) // now we can finally aim for the non-players
+        {
+            if (worm.abstractCreature != nonPlayer && nonPlayer.realizedCreature != null)
+            {
+                float target = Custom.AimFromOneVectorToAnother(worm.bodyChunks[1].pos, nonPlayer.realizedCreature.mainBodyChunk.pos);
+                float num2 = Custom.Dist(worm.bodyChunks[1].pos, nonPlayer.realizedCreature.mainBodyChunk.pos);
                 if (Mathf.Abs(Mathf.DeltaAngle(current, target)) < 35f && num2 < num)
                 {
                     num = num2;
-                    creature = worm.abstractCreature.Room.creatures[i].realizedCreature;
+                    creature = nonPlayer.realizedCreature;
                 }
             }
         }
         if (creature != null)
         {
             worm.controlledCharge = Custom.DirVec(worm.bodyChunks[1].pos, creature.mainBodyChunk.pos) * 80f;
-        }*/
+        }
+        // end of auto-aim wild creatures
+
         p2 = worm.bodyChunks[1].pos + worm.controlledCharge;
         float num3 = Mathf.InverseLerp(0.5f, 0.95f, attackReady);
         Vector2 vector = Custom.DirVec(p, p2);
