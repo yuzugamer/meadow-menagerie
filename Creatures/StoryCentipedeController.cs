@@ -21,6 +21,8 @@ public class StoryCentipedeController : CreatureController
         this.customization = new ExpandedAvatarData(customization);
     }
 
+    // most of this stuff is just stolen from dr's more creatures, so that i could get an idea of how this stuff works. all of this desperately needs to be redone
+
     public override WorldCoordinate CurrentPathfindingPosition
     {
         get

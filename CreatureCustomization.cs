@@ -1,4 +1,4 @@
-﻿/*using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using RainMeadow;
 using System;
 using System.Collections.Generic;
@@ -38,4 +38,4 @@ public class CreatureCustomization : SlugcatCustomization
             customization.selectedCreature = selectedCreature;
         }
     }
-}*/
+}

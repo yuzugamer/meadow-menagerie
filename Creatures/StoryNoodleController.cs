@@ -195,7 +195,7 @@ public class StoryNoodleController : NoodleController
                 }
                 else if (noodle is SmallNeedleWorm small)
                 {
-                    small.Scream();
+                    small.SmallScream(true);
                 }
                 lastThrow = true;
             }

@@ -283,7 +283,7 @@ public class StoryYeekController : GroundCreatureController
     {
         if (CreatureController.creatureControllers.TryGetValue(self.creature.realizedCreature, out var cc))
         {
-            //cc.AIUpdate(self);
+            cc.AIUpdate(self);
         } else
         {
             orig(self);

@@ -61,7 +61,8 @@ public class MenagerieGameMode : StoryGameMode
             var results = new List<OnlineCreature>();
             foreach (var kvp in lobby.playerAvatars)
             {
-                if (kvp.Value.FindEntity(true) != null && kvp.Value.FindEntity(true) is OnlineCreature oc)
+                var entity = kvp.Value.FindEntity(true);
+                if (entity != null && entity is OnlineCreature oc)
                 {
                     results.Add(oc);
                 }
@@ -73,14 +74,26 @@ public class MenagerieGameMode : StoryGameMode
     {
         get
         {
-            return clientSettings.avatars.Select(id => (id.FindEntity() as OnlineCreature).abstractCreature).ToArray();
+            return clientSettings.avatars.Select(id => (id.FindEntity(true) as OnlineCreature).abstractCreature).ToArray();
         }
     }
     public AbstractCreature firstAliveAvatar
     {
         get
         {
-            return abstractAvatars.First(avi => avi.realizedCreature != null && !avi.realizedCreature.dead);
+            foreach (var kvp in lobby.playerAvatars)
+            {
+                var entity = kvp.Value.FindEntity(true);
+                if (entity is OnlineCreature oc)
+                {
+                    if (oc.realized && oc.realizedCreature != null && !oc.realizedCreature.dead)
+                    {
+                        return oc.abstractCreature;
+                    }
+                }
+            }
+            return null;
+            //return abstractAvatars.First(avi => avi.realizedCreature != null && !avi.realizedCreature.dead);
         }
     }
 
@@ -130,7 +143,8 @@ public class MenagerieGameMode : StoryGameMode
 
     public override void ConfigureAvatar(OnlineCreature onlineCreature)
     {
-        if (selectedCreature != CreatureTemplate.Type.Slugcat && (!ModManager.MSC || selectedCreature != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC)) avatarSettings.wearingCape = false;
+		var type = onlineCreature.abstractCreature.creatureTemplate.type;
+        if (type != CreatureTemplate.Type.Slugcat && (!ModManager.MSC || type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC)) avatarSettings.wearingCape = false;
         base.ConfigureAvatar(onlineCreature);
     }
 
@@ -139,6 +153,7 @@ public class MenagerieGameMode : StoryGameMode
         RainMeadow.RainMeadow.Debug(oe);
         if (oe is OnlineCreature onlineCreature)
         {
+            // shrug
             oe.AddData<MeadowCreatureData>(new MeadowCreatureData());
             //oe.AddData<StoryControllerData>(new StoryControllerData());
 
@@ -220,7 +235,7 @@ public class MenagerieGameMode : StoryGameMode
     public override void Customize(Creature creature, OnlineCreature oc)
     {
         base.Customize(creature, oc);
-        if (selectedCreature != CreatureTemplate.Type.Slugcat && oc.TryGetData<SlugcatCustomization>(out var data))
+        if (creature.Template.type != CreatureTemplate.Type.Slugcat && oc.TryGetData<SlugcatCustomization>(out var data))
         {
             DefaultAvatarBinds(creature, oc, data);
         }
@@ -260,12 +275,22 @@ public class MenagerieGameMode : StoryGameMode
         else if (creature is Centipede centi)
         {
             new StoryCentipedeController(centi, oc, 0, customization);
-        } else if (ModManager.DLCShared && creature is MoreSlugcats.Yeek yeek)
+        }
+        else if (ModManager.DLCShared && creature is MoreSlugcats.Yeek yeek)
         {
             new StoryYeekController(yeek, oc, 0, customization);
-        } else if (creature is JetFish fish)
+        }
+        else if (ModManager.MSC && creature is Player player && player.isNPC)
+        {
+            new StorySlugNPCController(player, oc, 0, customization);
+        }
+        else if (creature is JetFish fish)
         {
             new StoryJetFishController(fish, oc, 0, customization);
+        }
+        else if (creature is BigEel eel)
+        {
+            new StoryBigEelController(eel, oc, 0, customization);
         }
         else if (creature is not Player)
         {

@@ -79,14 +79,14 @@ public static class CreatureHooks
 
     public static void On_Lizard_CarryObject(On.Lizard.orig_CarryObject orig, Lizard self, bool eu)
     {
-        if (CreatureController.creatureControllers.TryGetValue(self, out var liz) && liz is StoryLizardController && !(liz.input[0].pckp || liz.input[0].mp))
-        {
-            if (UnityEngine.Random.value < 0.025f && (!(self.grasps[0].grabbed is Creature) || self.AI.DynamicRelationship((self.grasps[0].grabbed as Creature).abstractCreature).type != CreatureTemplate.Relationship.Type.Eats))
-            {
-                self.LoseAllGrasps();
-                return;
-            }
-        }
+        //if (CreatureController.creatureControllers.TryGetValue(self, out var liz) && liz is StoryLizardController)
+        //{
+            //if (UnityEngine.Random.value < 0.025f && (!(self.grasps[0].grabbed is Creature) || self.AI.DynamicRelationship((self.grasps[0].grabbed as Creature).abstractCreature).type != CreatureTemplate.Relationship.Type.Eats))
+            //{
+                //self.LoseAllGrasps();
+                //return;
+            //}
+        //}
         orig(self, eu);
     }
 

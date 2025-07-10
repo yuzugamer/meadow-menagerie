@@ -35,6 +35,7 @@ public static class MeadowHooks
             new ILHook(typeof(MeadowCreatureData.State).GetMethod("ReadTo", BindingFlags.Instance | BindingFlags.Public), IL_MeadowCreatureData_State_ReadTo);
             new ILHook(typeof(OnlinePlayerDeathBump).GetConstructor(new Type[] { typeof(PlayerSpecificOnlineHud), typeof(SlugcatCustomization) }), IL_OnlinePlayerDeathBump);
             new Hook(typeof(StoryModeExtensions).GetMethod(nameof(StoryModeExtensions.FriendlyFireSafetyCandidate), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic), On_StoryModeExtensions_FriendlyFireSafetyCandidate);
+            new Hook(typeof(AbstractPhysicalObjectState).GetMethod(nameof(AbstractPhysicalObjectState.GetRealizedState), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public), On_AbstractCreatureState_GetRealizedState);
         }
         catch (Exception ex)
         {
@@ -321,9 +322,27 @@ public static class MeadowHooks
             {
                 StoryMenagerie.LogError("Avatar list is null!");
             }*/
-            if (self.owner.clientSettings.avatars != null && self.owner.clientSettings.avatars[0]?.FindEntity(true) is OnlineCreature oc)
+            //if (self.owner.clientSettings.avatars != null && self.owner.clientSettings.avatars[0]?.FindEntity(true) is OnlineCreature oc)
+            OnlineCreature crit = null;
+            var owner = self.owner.clientSettings.owner;
+            foreach (var kvp in OnlineManager.lobby.playerAvatars)
             {
-                return CreatureSymbol.SpriteNameOfCreature(CreatureSymbol.SymbolDataFromCreature(oc.abstractCreature));
+                if (kvp.Key == owner)
+                {
+                    crit = kvp.Value.FindEntity(true) as OnlineCreature;
+                }
+            }
+            if (crit != null)
+            {
+                return CreatureSymbol.SpriteNameOfCreature(CreatureSymbol.SymbolDataFromCreature(crit.abstractCreature));
+            }
+            else
+            {
+                crit = self.owner.clientSettings.avatars[0]?.FindEntity(true) as OnlineCreature;
+                if (crit != null)
+                {
+                    return CreatureSymbol.SpriteNameOfCreature(CreatureSymbol.SymbolDataFromCreature(crit.abstractCreature));
+                }
             }
         }
         return orig;
@@ -483,10 +502,20 @@ public static class MeadowHooks
         {
             return orig(creature);
         }
+        // slugpups get the spear
         if ((creature is Player p && !p.isNPC) || (creature is Creature crit && CreatureController.creatureControllers.TryGetValue(crit, out var _)))
         {
             return !menagerie.friendlyFire;
         }
         return false;
+    }
+
+    public static RealizedCreatureState On_AbstractCreatureState_GetRealizedState(Func<AbstractCreatureState, OnlinePhysicalObject, RealizedCreatureState> orig, AbstractCreatureState self, OnlinePhysicalObject onlineObject)
+    {
+        if (onlineObject.apo.realizedObject != null && onlineObject.apo.realizedObject is EggBug)
+        {
+            return new RealizedEggBugState((OnlineCreature)onlineObject);
+        }
+        return orig(self, onlineObject);
     }
 }

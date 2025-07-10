@@ -48,7 +48,7 @@ public class StoryMenagerie : BaseUnityPlugin
         { CreatureTemplate.Type.LanternMouse, CreatureTemplate.Type.LanternMouse },
         { CreatureTemplate.Type.CicadaA, CreatureTemplate.Type.CicadaA },
         { CreatureTemplate.Type.CicadaB, CreatureTemplate.Type.CicadaA },
-        { CreatureTemplate.Type.Centipede, CreatureTemplate.Type.Centipede },
+        //{ CreatureTemplate.Type.Centipede, CreatureTemplate.Type.Centipede },
         { CreatureTemplate.Type.JetFish, CreatureTemplate.Type.JetFish }
     };
 
@@ -61,6 +61,7 @@ public class StoryMenagerie : BaseUnityPlugin
         instance = this;
         On.RainWorld.OnModsInit += On_RainWorld_OnModsInit;
         On.RainWorld.PostModsInit += On_RainWorld_PostModsInit;
+        On.RainWorld.OnModsDisabled += On_RainWorld_OnModsDisabled;
     }
 
     public static void LogError(object error)
@@ -75,6 +76,9 @@ public class StoryMenagerie : BaseUnityPlugin
         //instance.Logger.LogDebug(info);
         UnityEngine.Debug.Log("[MENAGERIE DEBUG] " + info);
     }
+	
+	// mainly here to be easily hooked in case anyone wants to add compatibility for other gamemodes
+	public static bool IsMenagerie => OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode;
 
     /*public static void RegisterPlayableCreature(CreatureTemplate.Type creature, string group)
     {
@@ -122,6 +126,7 @@ public class StoryMenagerie : BaseUnityPlugin
                 MenuHooks.Apply();
                 HudHooks.Apply();
                 StoryHooks.Apply();
+                BugHooks.Apply();
             } catch (Exception ex)
             {
                 StoryMenagerie.LogError("Failed to load!");
@@ -141,7 +146,7 @@ public class StoryMenagerie : BaseUnityPlugin
             if (ModManager.MSC)
             {
                 RegisterPlayableCreature(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.TrainLizard, CreatureTemplate.Type.LizardTemplate);
-                //RegisterPlayableCreature(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, null);
+                RegisterPlayableCreature(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, null);
                 RegisterPlayableCreature(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.ScavengerKing, CreatureTemplate.Type.Scavenger);
                 RegisterPlayableCreature(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.FireBug, CreatureTemplate.Type.EggBug);
             }
@@ -218,6 +223,7 @@ public class StoryMenagerie : BaseUnityPlugin
     public static void On_RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
     {
         orig(self);
+        Enums.Register();
         edibleFood = new();
         var lampsterFood = new List<Type>()
         {
@@ -434,5 +440,11 @@ public class StoryMenagerie : BaseUnityPlugin
                 }
             }
         }
+    }
+
+    public static void On_RainWorld_OnModsDisabled(On.RainWorld.orig_OnModsDisabled orig, RainWorld self, ModManager.Mod[] newlyDisabledMods)
+    {
+        orig(self, newlyDisabledMods);
+        Enums.Unregister();
     }
 }

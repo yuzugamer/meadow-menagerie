@@ -44,8 +44,9 @@ public class StoryLizardController : LizardController//, IStoryCreatureControlle
 
             var lizPos = lizard.mainBodyChunk.pos;
             var dist = lizard.lizardParams.attemptBiteRadius + 5f;
+            var compare = dist;
             PhysicalObject target = null;
-            foreach (var layer in lizard.room.physicalObjects)
+            /*foreach (var layer in lizard.room.physicalObjects)
             {
                 foreach (var obj in layer)
                 {
@@ -66,6 +67,39 @@ public class StoryLizardController : LizardController//, IStoryCreatureControlle
                         } else
                         {
                             StoryMenagerie.Debug("bite target not set");
+                        }
+                    }
+                }
+            }*/
+            foreach (var layer in creature.room.physicalObjects)
+            {
+                foreach (var obj in layer)
+                {
+                    if (obj != null && obj != creature && (obj.abstractPhysicalObject.rippleLayer == creature.abstractPhysicalObject.rippleLayer || obj.abstractPhysicalObject.rippleBothSides || creature.abstractPhysicalObject.rippleBothSides) /*&& (obj is not PlayerCarryableItem carryable || carryable.forbiddenToPlayer < 1)*/ && Custom.DistLess(lizPos, obj.bodyChunks[0].pos, obj.bodyChunks[0].rad + dist))// && (Custom.DistLess(creature.bodyChunks[0].pos, obj.bodyChunks[0].pos, obj.bodyChunks[0].rad + (dist / 2f)) || creature.room.VisualContact(creature.bodyChunks[0].pos, obj.bodyChunks[0].pos)) /*&& creature.CanIPickThisUp(obj)*/)
+                    {
+                        var tdist = Vector2.Distance(creature.bodyChunks[0].pos, obj.bodyChunks[0].pos);
+                        if (obj is Spear spear)
+                        {
+                            if (spear.abstractSpear.stuckInWall)
+                            {
+                                continue;
+                            }
+                            if (obj is Creature crit)
+                            {
+                                if (!lizard.AI.DynamicRelationship(crit.abstractCreature).GoForKill)
+                                {
+                                    tdist *= 1.2f;
+                                }
+                            }
+                            else
+                            {
+                                tdist *= 100f;
+                            }
+                        }
+                        if (tdist < compare)
+                        {
+                            target = obj;
+                            compare = tdist;
                         }
                     }
                 }

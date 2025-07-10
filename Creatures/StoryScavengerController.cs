@@ -91,45 +91,55 @@ public class StoryScavengerController : ScavengerController//, IStoryCreatureCon
         {
             if (!lastGrab)
             {
-                var found = LookForItems();
-                //if (grabDownTime == 0)
-                //{
-                //StoryMenagerie.LogDebug("looking for items to pick up");
-                /*// copy pasted this because while LookForItemsToPickUp has this exact code, it has a SafariControlled check before it, and i'm not sure source code without dlc installed contains the code. would just make an il hook for the check otherwise
-                foreach (var layer in scavenger.room.physicalObjects)
+                if (input[0].x < 0)
                 {
-                    foreach (var obj in layer)
+                    if (scavenger.grasps[0] != null)
                     {
-                        if (obj.abstractPhysicalObject.rippleLayer == scavenger.abstractCreature.rippleLayer || obj.abstractPhysicalObject.rippleBothSides || scavenger.abstractCreature.rippleBothSides)
+                        scavenger.ReleaseGrasp(0);
+                    }
+                }
+                else
+                {
+                    var found = LookForItems();
+                    //if (grabDownTime == 0)
+                    //{
+                    //StoryMenagerie.LogDebug("looking for items to pick up");
+                    /*// copy pasted this because while LookForItemsToPickUp has this exact code, it has a SafariControlled check before it, and i'm not sure source code without dlc installed contains the code. would just make an il hook for the check otherwise
+                    foreach (var layer in scavenger.room.physicalObjects)
+                    {
+                        foreach (var obj in layer)
                         {
-                            var apo = obj.abstractPhysicalObject;
-                            if (obj != null && !(apo is AbstractCreature) && Custom.DistLess(scavenger.mainBodyChunk.pos, obj.firstChunk.pos, 50f) && this.room.VisualContact(scavenger.mainBodyChunk.pos, obj.firstChunk.pos) && obj.grabbedBy.Count < 1 && (!(apo is AbstractSpear) || !(apo as AbstractSpear).stuckInWall))
+                            if (obj.abstractPhysicalObject.rippleLayer == scavenger.abstractCreature.rippleLayer || obj.abstractPhysicalObject.rippleBothSides || scavenger.abstractCreature.rippleBothSides)
                             {
-                                if (obj is Weapon)
+                                var apo = obj.abstractPhysicalObject;
+                                if (obj != null && !(apo is AbstractCreature) && Custom.DistLess(scavenger.mainBodyChunk.pos, obj.firstChunk.pos, 50f) && this.room.VisualContact(scavenger.mainBodyChunk.pos, obj.firstChunk.pos) && obj.grabbedBy.Count < 1 && (!(apo is AbstractSpear) || !(apo as AbstractSpear).stuckInWall))
                                 {
-                                    if ((obj as Weapon).mode == Weapon.Mode.Thrown)
+                                    if (obj is Weapon)
                                     {
-                                        continue;
+                                        if ((obj as Weapon).mode == Weapon.Mode.Thrown)
+                                        {
+                                            continue;
+                                        }
                                     }
+                                    while (obj.grabbedBy.Count > 0)
+                                    {
+                                        obj.grabbedBy[0].Release();
+                                    }
+                                    obj.abstractPhysicalObject.LoseAllStuckObjects();
+                                    scavenger.PickUpAndPlaceInInventory(obj, false);
+                                    break;
                                 }
-                                while (obj.grabbedBy.Count > 0)
-                                {
-                                    obj.grabbedBy[0].Release();
-                                }
-                                obj.abstractPhysicalObject.LoseAllStuckObjects();
-                                scavenger.PickUpAndPlaceInInventory(obj, false);
-                                break;
                             }
                         }
+                    }*/
+                    //}
+                    if (!found && grabDownTime != 0)
+                    {
+                        scavenger.ControlCycleInventory();
+                        grabDownTime = 0;
                     }
-                }*/
-                //}
-                if (!found && grabDownTime != 0)
-                {
-                    scavenger.ControlCycleInventory();
-                    grabDownTime = 0;
+                    else grabDownTime = 12;
                 }
-                else grabDownTime = 12;
             }
             lastGrab = true;
         }
@@ -197,7 +207,7 @@ public class StoryScavengerController : ScavengerController//, IStoryCreatureCon
             }
             scavenger.abstractCreature.controlled = false;
         }
-        scavenger.moveModeChangeCounter = -5;
+        if (!this.IsOnPole) scavenger.moveModeChangeCounter = -5;
     }
 
     public override void Moving(float magnitude)

@@ -31,6 +31,7 @@ public static class CreatureControllerHooks
         StoryLanternMouseController.ApplyHooks();
         StoryJetFishController.ApplyHooks();
         StoryYeekController.ApplyHooks();
+        StoryBigEelController.ApplyHooks();
         //GetSpecialInput = typeof(CreatureController).GetMethod("GetSpecialInput", BindingFlags.NonPublic | BindingFlags.Instance);
         //CreatureControllerMoving = typeof(CreatureController).GetMethod("Moving", BindingFlags.NonPublic | BindingFlags.Instance);
         //CreatureControllerLookImpl = typeof(CreatureController).GetMethod("LookImpl", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -56,7 +57,7 @@ public static class CreatureControllerHooks
     public static void On_CreatureController_ctor(On_CreatureController_orig_ctor orig, CreatureController self, Creature creature, OnlineCreature oc, int playerNumber, MeadowAvatarData customization)
     {
         // just in case
-        if (OnlineManager.lobby == null || OnlineManager.lobby.gameMode is MenagerieGameMode)
+        if (OnlineManager.lobby == null || StoryMenagerie.IsMenagerie)
         {
             // most of the code is yoinked, but what can 'ya do
             self.creature = creature;
@@ -266,7 +267,7 @@ public static class CreatureControllerHooks
                     }
                     else if (self.creature.room.world.rainCycle.timer > self.creature.room.world.rainCycle.cycleLength)
                     {
-                        if (self.FoodInRoom(self.creature.room, false) >= self.foodToHibernate())
+                        if (self.FoodInRoom(self.creature.room, false) >= ((story.saveState.malnourished) ? self.maxFood() : self.foodToHibernate()))
                         {
                             clientData.readyForWin = true;
                             self.readyForWin = true;
@@ -600,7 +601,7 @@ public static class CreatureControllerHooks
 
     public static void On_ScavengerController_ScavengerGraphics_ctor(Action<On.ScavengerGraphics.orig_ctor, ScavengerGraphics, PhysicalObject> orig, On.ScavengerGraphics.orig_ctor origorig, ScavengerGraphics self, PhysicalObject ow)
     {
-        if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode menagerie && ow.abstractPhysicalObject.ID is var id && id.RandomSeed == -273819595)
+        if (StoryMenagerie.IsMenagerie && ow.abstractPhysicalObject.ID.number == -273819595)
         {
             origorig(self, ow);
             return;

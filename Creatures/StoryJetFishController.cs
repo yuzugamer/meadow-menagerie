@@ -12,7 +12,6 @@ using MoreSlugcats;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using UnityEngine.Rendering;
-using static RewiredConsts.Layout;
 
 namespace StoryMenagerie;
 

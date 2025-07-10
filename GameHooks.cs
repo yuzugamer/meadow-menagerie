@@ -123,13 +123,16 @@ public static class GameHooks
             return;
         }
         else*/
-        foreach (var avatar in menagerie.avatars.Select(avi => avi.abstractCreature))
-        {
-            if (avatar.realizedCreature != null && avatar.state != null && !avatar.state.alive)
-            {
-                win = false;
-            }
-        }
+        // old method
+        //foreach (var avatar in menagerie.abstractAvatars)
+        //{
+        //    if (avatar.realizedCreature == null || avatar.state == null || !avatar.state.alive)
+        //    {
+        //        win = false;
+        //    }
+        //}
+        // not sure if this is better or not? intuitively seems better, but not super sure
+        win = menagerie.abstractAvatars.Any(avi => avi.realizedCreature != null && avi.state != null && avi.state.alive && avi.Room == self.room.abstractRoom);
         if (win)
         {
             self.room.game.Win(menagerie.FoodInRoom(false) < SlugcatStats.SlugcatFoodMeter(self.room.game.GetStorySession.saveStateNumber).y, false);
@@ -148,14 +151,15 @@ public static class GameHooks
                 "----Adapt save state to world"
             });
             AbstractCreature acrit = null;
-            foreach (var avi in menagerie.avatars)
+            foreach (var avi in menagerie.onlineAvatars)
             {
                 var avicrit = avi.abstractCreature;
                 if (avicrit != null && avicrit.state.alive) acrit = avicrit;
             }
             if (acrit == null)
             {
-                acrit = menagerie.avatars[0].abstractCreature;
+                acrit = menagerie.onlineAvatars[0].abstractCreature;
+                StoryMenagerie.LogError("(SaveState.BringUpToDate) No living avatar found in! Defaulting to first avatar");
             }
             WorldCoordinate pos = acrit.pos;
             if (pos == default(WorldCoordinate))
@@ -168,7 +172,7 @@ public static class GameHooks
             AbstractRoom abstractRoom = game.world.GetAbstractRoom(pos);
             if (pos == default(WorldCoordinate) && abstractRoom == null)
             {
-                foreach (var avi in menagerie.avatars)
+                foreach (var avi in menagerie.onlineAvatars)
                 {
                     if (avi != null)
                     {
@@ -186,7 +190,7 @@ public static class GameHooks
             self.TrySetVanillaDen(abstractRoom.name);
             self.nextIssuedID = game.nextIssuedId;
             var grabbed = new List<string>();
-            foreach (var avatar in menagerie.avatars)
+            foreach (var avatar in menagerie.onlineAvatars)
             {
                 var avi = avatar.realizedCreature;
                 if (avi != null)
@@ -220,7 +224,7 @@ public static class GameHooks
             game.world.regionState.AdaptRegionStateToWorld(pos.room, -1);
             self.creatureCommunitiesString = game.session.creatureCommunities.ToString();
             bool itemsSwallowed = false;
-            foreach (var avi in menagerie.avatars)
+            foreach (var avi in menagerie.onlineAvatars)
             {
                 if(avi.realizedCreature != null && avi.realizedCreature is Player scug)
                 {
@@ -234,7 +238,7 @@ public static class GameHooks
             }
             if (itemsSwallowed)
             {
-                var slugcats = menagerie.avatars.Select(oc => oc.abstractCreature).Where(ac => ac.creatureTemplate.type == CreatureTemplate.Type.Slugcat);
+                var slugcats = menagerie.abstractAvatars.Where(ac => ac.creatureTemplate.type == CreatureTemplate.Type.Slugcat);
                 self.swallowedItems = new string[slugcats.Count()];
                 int i = 0;
                 foreach (var slug in slugcats)
@@ -473,7 +477,8 @@ public static class GameHooks
                     game.GetStorySession.playerSessionRecords[i].wentToSleepInRegion = game.world.region.name;
                     foreach (var creature in game.world.GetAbstractRoom(avatars[i].pos).creatures)
                     {
-                        if (creature.state.alive && creature.state.socialMemory != null && creature.realizedCreature != null && creature.abstractAI != null && creature.abstractAI.RealAI != null && creature.abstractAI.RealAI.friendTracker != null && creature.abstractAI.RealAI.friendTracker.friend != null && creature.abstractAI.RealAI.friendTracker.friend == avatars[i].realizedCreature && creature.state.socialMemory.GetLike(avatars[i].ID) > 0f)
+                        // not sure if the contains check is necessary tbh idek it's 2 am
+                        if (creature.state.alive && !story.abstractAvatars.Contains(creature) && creature.state.socialMemory != null && creature.realizedCreature != null && creature.abstractAI != null && creature.abstractAI.RealAI != null && creature.abstractAI.RealAI.friendTracker != null && creature.abstractAI.RealAI.friendTracker.friend != null && creature.abstractAI.RealAI.friendTracker.friend == avatars[i].realizedCreature && creature.state.socialMemory.GetLike(avatars[i].ID) > 0f)
                         {
                             if (ModManager.MSC && creature.creatureTemplate.type == MoreSlugcatsEnums.CreatureTemplateType.SlugNPC)
                             {
@@ -851,6 +856,7 @@ public static class GameHooks
         return orig(self);
     }
 
+    // unused, no clue why is this still here, but i'm too scared to get rid of it
     public static void On_RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished, bool fromWarpPoint)
     {
         self.manager.artificerDreamNumber = -1;

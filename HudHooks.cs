@@ -13,6 +13,7 @@ using RWCustom;
 using UnityEngine;
 using System.Reflection;
 using Mono.Cecil;
+using MonoMod.RuntimeDetour;
 
 namespace StoryMenagerie;
 
@@ -40,6 +41,9 @@ public static class HudHooks
         //{
             IL.MoreSlugcats.HypothermiaMeter.Update += IL_HypothermiaMeter_Update;
         //}
+        // reminds me that threat music needs to be worked on
+        new Hook(typeof(ThreatPulser).GetMethod("get_Threat", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public), On_ThreatPulser_get_Threat);
+        new Hook(typeof(ThreatPulser).GetMethod("get_Show", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public), On_ThreatPulser_get_Show);
     }
 
     private static bool ShouldInitHUD(RoomCamera self) => OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode && self.room != null && self.followAbstractCreature != null && self.followAbstractCreature.creatureTemplate.type != CreatureTemplate.Type.Slugcat && self.followAbstractCreature.realizedCreature != null && self.game.world != null && !self.game.world.singleRoomWorld;
@@ -610,5 +614,46 @@ public static class HudHooks
             self.lastCount = hud.owner.CurrentFood;
         }
         orig(self, hud, maxFood, survivalLimit, associatedPup, pupNumber);
+    }
+
+    public static float On_ThreatPulser_get_Threat(Func<ThreatPulser, float> orig, ThreatPulser self)
+    {
+        if (self.hud.owner is CreatureController cc)
+        {
+            if (cc.creature == null || cc.creature.room == null)
+            {
+                return 0f;
+            }
+            var game = cc.creature.room.game;
+
+            if (game.GameOverModeActive)
+            {
+                return 0f;
+            }
+            if (game.manager.musicPlayer != null)
+            {
+                return game.manager.musicPlayer.threatTracker.currentMusicAgnosticThreat;
+            }
+            if (game.manager.fallbackThreatDetermination == null)
+            {
+                game.manager.fallbackThreatDetermination = new ThreatDetermination(0);
+            }
+            return game.manager.fallbackThreatDetermination.currentMusicAgnosticThreat;
+        }
+        return orig(self);
+    }
+
+    public static bool On_ThreatPulser_get_Show(Func<ThreatPulser, bool> orig, ThreatPulser self)
+    {
+        if (self.hud.owner is CreatureController cc)
+        {
+            var submerged = (cc.creature is AirBreatherCreature creature && creature.lungs < 1f);
+            if (!MMF.cfgBreathTimeVisualIndicator.Value)
+            {
+                submerged = false;
+            }
+            return !submerged && self.Threat > 0f;
+        }
+        return orig(self);
     }
 }

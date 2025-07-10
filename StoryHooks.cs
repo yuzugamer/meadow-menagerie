@@ -1922,7 +1922,7 @@ public static class StoryHooks
             slug.airInLungs = 1f;
             slug.lungsExhausted = false;
         }
-        if (crit.graphicsModule != null && (crit.graphicsModule as PlayerGraphics).lightSource != null)
+        if (crit.graphicsModule is PlayerGraphics && (crit.graphicsModule as PlayerGraphics).lightSource != null)
         {
             if (self.Inverted)
             {
@@ -1974,7 +1974,7 @@ public static class StoryHooks
 
     public static Creature VoidWormPlayer(VoidWorm self, Creature orig)
     {
-        if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode)
+        if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode && self != null)
         {
             if (voidWormCrits.TryGetValue(self, out var crit))
             {
