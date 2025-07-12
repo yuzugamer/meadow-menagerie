@@ -41,7 +41,8 @@ public class StoryNoodleController : NoodleController
         }
 
         // auto-aim wild creatures
-        if (!this.onlineCreature.isMine || Options.NootAutoAim.Value)
+        //if (!this.onlineCreature.isMine || Options.NootAutoAim.Value)
+        if (!input[0].AnyDirectionalInput)
         {
             Creature creature = null;
             float num = float.MaxValue;

@@ -162,7 +162,7 @@ public static class StoryCreatureController
     public static int FoodInRoom(this CreatureController self, Room checkRoom, bool eatAndDestroy)
     {
         if (OnlineManager.lobby == null || OnlineManager.lobby.gameMode is not MenagerieGameMode menagerie) return 0;
-        if (checkRoom.game.GetStorySession.saveStateNumber == SlugcatStats.Name.Red)
+        if (checkRoom == null || checkRoom.game == null || checkRoom.game.session == null || checkRoom.game.session is not StoryGameSession story || story.saveStateNumber == SlugcatStats.Name.Red)
         {
             return menagerie.foodPoints;
         }
@@ -177,7 +177,7 @@ public static class StoryCreatureController
             "Eat edibles in room"
             });
         }
-        if (eatAndDestroy && checkRoom.game.session is StoryGameSession story && !story.saveState.deathPersistentSaveData.reinforcedKarma)
+        if (eatAndDestroy && !story.saveState.deathPersistentSaveData.reinforcedKarma)
         {
             foreach (var entity in checkRoom.abstractRoom.entities)
             {

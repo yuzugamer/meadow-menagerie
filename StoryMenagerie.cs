@@ -49,7 +49,9 @@ public class StoryMenagerie : BaseUnityPlugin
         { CreatureTemplate.Type.CicadaA, CreatureTemplate.Type.CicadaA },
         { CreatureTemplate.Type.CicadaB, CreatureTemplate.Type.CicadaA },
         //{ CreatureTemplate.Type.Centipede, CreatureTemplate.Type.Centipede },
-        { CreatureTemplate.Type.JetFish, CreatureTemplate.Type.JetFish }
+        { CreatureTemplate.Type.JetFish, CreatureTemplate.Type.JetFish },
+        { CreatureTemplate.Type.DaddyLongLegs, CreatureTemplate.Type.DaddyLongLegs },
+        { CreatureTemplate.Type.BrotherLongLegs, CreatureTemplate.Type.DaddyLongLegs }
     };
 
     public static AbstractCreature.Personality GamerPersonality = new AbstractCreature.Personality { sympathy = 0f, energy = 1f, bravery = 1f, nervous = 0f, aggression = 1f, dominance = 1f};
@@ -142,6 +144,7 @@ public class StoryMenagerie : BaseUnityPlugin
                 RegisterPlayableCreature(DLCSharedEnums.CreatureTemplateType.ZoopLizard, CreatureTemplate.Type.LizardTemplate);
                 RegisterPlayableCreature(DLCSharedEnums.CreatureTemplateType.ScavengerElite, CreatureTemplate.Type.Scavenger);
                 RegisterPlayableCreature(DLCSharedEnums.CreatureTemplateType.Yeek, DLCSharedEnums.CreatureTemplateType.Yeek);
+                RegisterPlayableCreature(DLCSharedEnums.CreatureTemplateType.TerrorLongLegs, CreatureTemplate.Type.DaddyLongLegs);
             }
             if (ModManager.MSC)
             {

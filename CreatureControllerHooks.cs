@@ -32,6 +32,7 @@ public static class CreatureControllerHooks
         StoryJetFishController.ApplyHooks();
         StoryYeekController.ApplyHooks();
         StoryBigEelController.ApplyHooks();
+        LongLegsController.EnableLongLegs();
         //GetSpecialInput = typeof(CreatureController).GetMethod("GetSpecialInput", BindingFlags.NonPublic | BindingFlags.Instance);
         //CreatureControllerMoving = typeof(CreatureController).GetMethod("Moving", BindingFlags.NonPublic | BindingFlags.Instance);
         //CreatureControllerLookImpl = typeof(CreatureController).GetMethod("LookImpl", BindingFlags.NonPublic | BindingFlags.Instance);
