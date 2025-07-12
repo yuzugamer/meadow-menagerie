@@ -294,6 +294,10 @@ public class MenagerieGameMode : StoryGameMode
         {
             new StoryBigEelController(eel, oc, 0, customization);
         }
+        else if (creature is DaddyLongLegs dll)
+        {
+            new LongLegsController(dll, oc, 0, customization);
+        }
         else if (creature is not Player)
         {
             throw new InvalidProgrammerException("You need to implement " + creature.ToString());

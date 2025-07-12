@@ -421,7 +421,7 @@ public static class GameHooks
             var avatars = story.abstractAvatars;
             foreach (var avi in avatars)
             {
-                if (avi.creatureTemplate.type == CreatureTemplate.Type.Slugcat || (ModManager.MSC && avi.creatureTemplate.type == MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC) && avi.realizedCreature != null)
+                if ((avi.creatureTemplate.type == CreatureTemplate.Type.Slugcat || (ModManager.MSC && avi.creatureTemplate.type == MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC)) && avi.realizedCreature != null)
                 {
                     self.food += self.sessionEndingFromSpinningTopEncounter ? (avi.realizedCreature as Player).FoodInStomach : (avi.realizedCreature as Player).FoodInRoom(true);
                 } else if (avi.realizedCreature != null && CreatureController.creatureControllers.TryGetValue(avi.realizedCreature, out var cc) && cc.isStory(out var scc))
@@ -520,7 +520,7 @@ public static class GameHooks
                     List<AbstractCreature> list = new List<AbstractCreature>();
                     foreach (PlayerSessionRecord playerSessionRecord in game.GetStorySession.playerSessionRecords)
                     {
-                        if (!list.Contains(playerSessionRecord.friendInDen))
+                        if (!story.abstractAvatars.Contains(playerSessionRecord.friendInDen) && !list.Contains(playerSessionRecord.friendInDen))
                         {
                             list.Add(playerSessionRecord.friendInDen);
                         }
