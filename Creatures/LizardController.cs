@@ -207,7 +207,7 @@ namespace StoryMenagerie.Creatures
                     {
                         // who even knows
                         //lizard.jawOpen = Mathf.Clamp(lizard.jawOpen + Mathf.Lerp((1f / (lizard.jawOpen > 0.75f ? (lizard.lizardParams.biteDelay + 2) : ((lizard.lizardParams.biteDelay + 1) / 2))), (1f - lizard.jawOpen) * 0.04f, Mathf.Pow(lizard.jawOpen, 1.6f)), 0f, 1f);
-                        lizard.jawOpen = Mathf.Clamp(lizard.jawOpen + Mathf.Lerp((1f / (lizard.jawOpen > 0.75f ? (lizard.lizardParams.biteDelay + 3) : ((lizard.lizardParams.biteDelay + 2) / 2))), (1f - lizard.jawOpen) * 0.075f, (lizard.jawOpen / 1.35f)), 0f, 1f);
+                        lizard.jawOpen = Mathf.Clamp(lizard.jawOpen + Mathf.Lerp((1f / (lizard.jawOpen > 0.75f ? (lizard.lizardParams.biteDelay + 3) : (lizard.lizardParams.biteDelay + 2))), (1f - lizard.jawOpen) * 0.075f, (lizard.jawOpen / 1.35f)), 0f, 1f);
                         grabHeld++;
                     }
                     else if (input[0].y < 0)
