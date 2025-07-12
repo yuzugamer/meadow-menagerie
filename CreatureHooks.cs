@@ -12,6 +12,7 @@ namespace StoryMenagerie;
 
 public static class CreatureHooks
 {
+    public static int shelterCleanupCounter = 0;
     public static void Apply()
     {
         On.Creature.Violence += On_Creature_Violence;
@@ -51,7 +52,12 @@ public static class CreatureHooks
         On.ShelterDoor.Update += (On.ShelterDoor.orig_Update orig, ShelterDoor self, bool eu) =>
         {
             orig(self, eu);
-            self.killHostiles = true;
+            ++shelterCleanupCounter;
+            if (shelterCleanupCounter >= 40 * 5) //every 5 seconds
+            {
+                self.killHostiles = true;
+                shelterCleanupCounter = 0;
+            }
         };
     }
 
