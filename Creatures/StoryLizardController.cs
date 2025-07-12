@@ -106,7 +106,7 @@ public class StoryLizardController : LizardController//, IStoryCreatureControlle
             bool success = false;
             if (target != null)
             {
-                if (lizard.tongue != null && lizard.tongue.Out)
+                if ((!ModManager.MSC || lizard.Template.type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.TrainLizard) && lizard.tongue != null && lizard.tongue.Out)
                 {
                     if (lizard.tongue.state != LizardTongue.State.StuckInTerrain)
                     {

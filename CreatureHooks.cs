@@ -41,7 +41,6 @@ public static class CreatureHooks
         On.JetFish.CarryObject += On_JetFish_CarryObject;
         On.ScavengerGraphics.Update += On_ScavengerGraphics_Update;
         On.Scavenger.Update += On_Scavenger_Update;
-        On.EggBug.ctor += On_EggBug_ctor;
         On.ShelterDoor.IsThisHostileCreatureForShelter += (On.ShelterDoor.orig_IsThisHostileCreatureForShelter orig, AbstractCreature ac) =>
         {
             // players are not "hostile"

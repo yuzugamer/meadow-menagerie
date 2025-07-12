@@ -994,22 +994,38 @@ public static class GameHooks
         orig(self);
         if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode)
         {
-            for (int l = 0; l < self.room.shortcuts.Length; l++)
+            for (int i = 0; i < self.room.shortcuts.Length; i++)
             {
-                if (self.room.shortcuts[l].shortCutType == ShortcutData.Type.NPCTransportation)
+                if (self.room.shortcuts[i].shortCutType == ShortcutData.Type.NPCTransportation)
                 {
-                    self.entranceSprites[l, 0]?.RemoveFromContainer(); // remove safari one
-                    self.entranceSprites[l, 0] = new FSprite("Pebble10", true);
-                    self.entranceSprites[l, 0].rotation = RWCustom.Custom.AimFromOneVectorToAnother(new Vector2(0f, 0f), -RWCustom.IntVector2.ToVector2(self.room.ShorcutEntranceHoleDirection(self.room.shortcuts[l].StartTile)));
-                    self.entranceSpriteLocations[l] = self.room.MiddleOfTile(self.room.shortcuts[l].StartTile) + RWCustom.IntVector2.ToVector2(self.room.ShorcutEntranceHoleDirection(self.room.shortcuts[l].StartTile)) * 15f;
-                    if ((ModManager.MMF && MoreSlugcats.MMF.cfgShowUnderwaterShortcuts.Value) || (self.room.water && self.room.waterInFrontOfTerrain && self.room.PointSubmerged(self.entranceSpriteLocations[l] + new Vector2(0f, 5f))))
+                    self.entranceSprites[i, 0]?.RemoveFromContainer(); // remove safari one
+                    self.entranceSprites[i, 0] = new FSprite("Pebble10", true);
+                    self.entranceSprites[i, 0].rotation = RWCustom.Custom.AimFromOneVectorToAnother(new Vector2(0f, 0f), -RWCustom.IntVector2.ToVector2(self.room.ShorcutEntranceHoleDirection(self.room.shortcuts[i].StartTile)));
+                    self.entranceSpriteLocations[i] = self.room.MiddleOfTile(self.room.shortcuts[i].StartTile) + RWCustom.IntVector2.ToVector2(self.room.ShorcutEntranceHoleDirection(self.room.shortcuts[i].StartTile)) * 15f;
+                    if ((ModManager.MMF && MoreSlugcats.MMF.cfgShowUnderwaterShortcuts.Value) || (self.room.water && self.room.waterInFrontOfTerrain && self.room.PointSubmerged(self.entranceSpriteLocations[i] + new Vector2(0f, 5f))))
                     {
-                        self.camera.ReturnFContainer((ModManager.MMF && MoreSlugcats.MMF.cfgShowUnderwaterShortcuts.Value) ? "GrabShaders" : "Items").AddChild(self.entranceSprites[l, 0]);
+                        self.camera.ReturnFContainer((ModManager.MMF && MoreSlugcats.MMF.cfgShowUnderwaterShortcuts.Value) ? "GrabShaders" : "Items").AddChild(self.entranceSprites[i, 0]);
                     }
                     else
                     {
-                        self.camera.ReturnFContainer("Shortcuts").AddChild(self.entranceSprites[l, 0]);
-                        self.camera.ReturnFContainer("Water").AddChild(self.entranceSprites[l, 1]);
+                        self.camera.ReturnFContainer("Shortcuts").AddChild(self.entranceSprites[i, 0]);
+                        self.camera.ReturnFContainer("Water").AddChild(self.entranceSprites[i, 1]);
+                    }
+                }
+                else if (self.room.shortcuts[i].shortCutType == ShortcutData.Type.CreatureHole)
+                {
+                    self.entranceSprites[i, 0]?.RemoveFromContainer();
+                    self.entranceSprites[i, 0] = new FSprite("BigGlyph11", true);
+                    self.entranceSprites[i, 0].rotation = RWCustom.Custom.AimFromOneVectorToAnother(new Vector2(0f, 0f), -RWCustom.IntVector2.ToVector2(self.room.ShorcutEntranceHoleDirection(self.room.shortcuts[i].StartTile)));
+                    self.entranceSpriteLocations[i] = self.room.MiddleOfTile(self.room.shortcuts[i].StartTile) + RWCustom.IntVector2.ToVector2(self.room.ShorcutEntranceHoleDirection(self.room.shortcuts[i].StartTile)) * 15f;
+                    if ((ModManager.MMF && MoreSlugcats.MMF.cfgShowUnderwaterShortcuts.Value) || (self.room.water && self.room.waterInFrontOfTerrain && self.room.PointSubmerged(self.entranceSpriteLocations[i] + new Vector2(0f, 5f))))
+                    {
+                        self.camera.ReturnFContainer((ModManager.MMF && MoreSlugcats.MMF.cfgShowUnderwaterShortcuts.Value) ? "GrabShaders" : "Items").AddChild(self.entranceSprites[i, 0]);
+                    }
+                    else
+                    {
+                        self.camera.ReturnFContainer("Shortcuts").AddChild(self.entranceSprites[i, 0]);
+                        self.camera.ReturnFContainer("Water").AddChild(self.entranceSprites[i, 1]);
                     }
                 }
             }
