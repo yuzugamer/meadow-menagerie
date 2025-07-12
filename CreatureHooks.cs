@@ -41,6 +41,18 @@ public static class CreatureHooks
         On.JetFish.CarryObject += On_JetFish_CarryObject;
         On.ScavengerGraphics.Update += On_ScavengerGraphics_Update;
         On.Scavenger.Update += On_Scavenger_Update;
+        On.ShelterDoor.IsThisHostileCreatureForShelter += (On.ShelterDoor.orig_IsThisHostileCreatureForShelter orig, AbstractCreature ac) =>
+        {
+            // players are not "hostile"
+            if (OnlineManager.lobby?.gameMode is MenagerieGameMode mgm)
+                return !mgm.abstractAvatars.Contains(ac);
+            return orig(ac);
+        };
+        On.ShelterDoor.Update += (On.ShelterDoor.orig_Update orig, ShelterDoor self, bool eu) =>
+        {
+            orig(self, eu);
+            self.killHostiles = true;
+        };
     }
 
     public static void On_Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stun)
