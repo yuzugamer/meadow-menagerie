@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 using UnityEngine;
 using RWCustom;
 using static RewiredConsts.Layout;
+using JetBrains.Annotations;
 
 namespace StoryMenagerie.Creatures
 {
     public class ScavengerController : RainMeadow.ScavengerController
     {
-        // all of this code is yoinked because i'm a terrible person
         public bool lastThrow;
         public bool lastGrab;
         public int grabDownTime;
@@ -33,6 +33,9 @@ namespace StoryMenagerie.Creatures
             // fix: hook onto update, ai update, abstract ai update and temporarily change energy
             // maybe find a way to work around this changing graphics
             //scavenger.abstractCreature.personality.energy = 1f;
+            scavenger.animation = null;
+            scavenger.movMode = Scavenger.MovementMode.Run;
+            scavenger.moveModeChangeCounter = -5;
         }
 
         public bool LookForItems()
@@ -188,6 +191,15 @@ namespace StoryMenagerie.Creatures
                     }
                     this.scavenger.TryThrow(null, ScavengerAI.ViolenceType.Lethal, aimPosition);
                 }
+            }
+
+            if (input[1].y > 0 && input[0].y < 0)
+            {
+                scavenger.movMode = Scavenger.MovementMode.Crawl;
+            }
+            else if (input[1].y < 0 && input[0].y > 0)
+            {
+                scavenger.movMode = Scavenger.MovementMode.Run;
             }
 
             if (input[0].spec)
