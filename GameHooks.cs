@@ -25,7 +25,7 @@ public static class GameHooks
         // might be a bit ambitious
         //new Hook(typeof(RainWorldGame).GetMethod("FirstAlivePlayer", BindingFlags.Instance | BindingFlags.Public), On_RainWorldGame_get_FirstAlivePlayer);
         new Hook(typeof(RainWorldGame).GetMethod("get_PlayersToProgressOrWin", BindingFlags.Instance | BindingFlags.Public), On_RainWorldGame_get_PlayersToProgressOrWin);
-        //On.Lizard.Act += StoryLizardController.On_Lizard_Act;
+        //On.Lizard.Act += LizardController.On_Lizard_Act;
         On.ShelterDoor.DoorClosed += On_ShelterDoor_DoorClosed;
         On.SaveState.BringUpToDate += On_SaveState_BringUpToDate;
         On.SaveState.SessionEnded += On_SaveState_SessionEnded;
@@ -1106,7 +1106,7 @@ public static class GameHooks
         {
             foreach (var acrit in self.room.abstractRoom.creatures)
             {
-                if (acrit.realizedCreature != null && CreatureController.creatureControllers.TryGetValue((Creature)acrit.realizedCreature, out var cc) && cc is StoryScavengerController scavy)
+                if (acrit.realizedCreature != null && CreatureController.creatureControllers.TryGetValue((Creature)acrit.realizedCreature, out var cc) && cc is Creatures.ScavengerController scavy)
                 {
                     var crit = acrit.realizedCreature;
                     if ((acrit.rippleLayer == self.abstractPhysicalObject.rippleLayer || acrit.rippleBothSides || self.abstractPhysicalObject.rippleBothSides) && crit.room == self.room && menagerie.foodPoints < story.characterStats.maxFood && scavy.handOnExternalFoodSource == null && scavy.dontEatExternalFoodSourceCounter < 1 && scavy.eatExternalFoodSourceCounter < 1 && (scavy.touchedNoInputCounter > 5 || scavy.input[0].pckp) && crit.grasps[0] == null)

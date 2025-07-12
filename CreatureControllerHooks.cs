@@ -27,12 +27,16 @@ public static class CreatureControllerHooks
     public static MethodInfo GroundConsciousUpdate;
     public static void Apply()
     {
-        StoryCentipedeController.ApplyHooks();
-        StoryLanternMouseController.ApplyHooks();
-        StoryJetFishController.ApplyHooks();
-        StoryYeekController.ApplyHooks();
-        StoryBigEelController.ApplyHooks();
-        LongLegsController.EnableLongLegs();
+        Creatures.CentipedeController.ApplyHooks();
+        Creatures.LanternMouseController.ApplyHooks();
+        Creatures.JetFishController.ApplyHooks();
+        Creatures.YeekController.ApplyHooks();
+        Creatures.BigEelController.ApplyHooks();
+        // Dr meadow
+        Creatures.LongLegsController.ApplyHooks();
+        Creatures.BarnacleController.ApplyHooks();
+        Creatures.DropBugController.ApplyHooks();
+
         //GetSpecialInput = typeof(CreatureController).GetMethod("GetSpecialInput", BindingFlags.NonPublic | BindingFlags.Instance);
         //CreatureControllerMoving = typeof(CreatureController).GetMethod("Moving", BindingFlags.NonPublic | BindingFlags.Instance);
         //CreatureControllerLookImpl = typeof(CreatureController).GetMethod("LookImpl", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -95,7 +99,7 @@ public static class CreatureControllerHooks
         orig(self, creature, oc, playerNumber, customization);
     }
 
-    public static void StoryLizardSkins(StoryLizardController self)
+    public static void StoryLizardSkins(LizardController self)
     {
 
     }
@@ -103,7 +107,7 @@ public static class CreatureControllerHooks
     public static void On_LizardController_LizardGraphics_ctor(On_LizardController_orig_LizardGraphics_ctor orig, On.LizardGraphics.orig_ctor origorig, LizardGraphics self, PhysicalObject ow)
     {
         StoryMenagerie.Debug("lizard graphics ctor");
-        if (ow is Lizard lizard && CreatureController.creatureControllers.TryGetValue(lizard, out var c) && c is StoryLizardController liz)
+        if (ow is Lizard lizard && CreatureController.creatureControllers.TryGetValue(lizard, out var c) && c is LizardController liz)
         {
             StoryMenagerie.Debug("is story lizard");
             origorig(self, ow);
@@ -491,7 +495,7 @@ public static class CreatureControllerHooks
             );
             c.MoveAfterLabels();
             c.Emit(OpCodes.Ldarg_0);
-            c.Emit(OpCodes.Isinst, typeof(StoryLizardController));
+            c.Emit(OpCodes.Isinst, typeof(LizardController));
             var skip = c.DefineLabel();
             c.Emit(OpCodes.Brtrue, skip);
             c.GotoNext(
@@ -521,7 +525,7 @@ public static class CreatureControllerHooks
             );
             c.MoveAfterLabels();
             c.Emit(OpCodes.Ldarg_0);
-            c.Emit(OpCodes.Isinst, typeof(StoryLizardController));
+            c.Emit(OpCodes.Isinst, typeof(LizardController));
             var skip = c.DefineLabel();
             c.Emit(OpCodes.Brfalse, skip);
             c.Emit(OpCodes.Ret);

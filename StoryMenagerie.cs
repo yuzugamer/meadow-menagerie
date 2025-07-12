@@ -48,10 +48,15 @@ public class StoryMenagerie : BaseUnityPlugin
         { CreatureTemplate.Type.LanternMouse, CreatureTemplate.Type.LanternMouse },
         { CreatureTemplate.Type.CicadaA, CreatureTemplate.Type.CicadaA },
         { CreatureTemplate.Type.CicadaB, CreatureTemplate.Type.CicadaA },
-        //{ CreatureTemplate.Type.Centipede, CreatureTemplate.Type.Centipede },
+        { CreatureTemplate.Type.Centipede, CreatureTemplate.Type.Centipede },
+        { CreatureTemplate.Type.Centiwing, CreatureTemplate.Type.Centipede },
+        { CreatureTemplate.Type.RedCentipede, CreatureTemplate.Type.Centipede },
+        { CreatureTemplate.Type.SmallCentipede, CreatureTemplate.Type.Centipede },
         { CreatureTemplate.Type.JetFish, CreatureTemplate.Type.JetFish },
+        // dr meadow new
         { CreatureTemplate.Type.DaddyLongLegs, CreatureTemplate.Type.DaddyLongLegs },
-        { CreatureTemplate.Type.BrotherLongLegs, CreatureTemplate.Type.DaddyLongLegs }
+        { CreatureTemplate.Type.BrotherLongLegs, CreatureTemplate.Type.DaddyLongLegs },
+        { CreatureTemplate.Type.DropBug, CreatureTemplate.Type.DropBug }
     };
 
     public static AbstractCreature.Personality GamerPersonality = new AbstractCreature.Personality { sympathy = 0f, energy = 1f, bravery = 1f, nervous = 0f, aggression = 1f, dominance = 1f};
@@ -129,7 +134,8 @@ public class StoryMenagerie : BaseUnityPlugin
                 HudHooks.Apply();
                 StoryHooks.Apply();
                 BugHooks.Apply();
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 StoryMenagerie.LogError("Failed to load!");
                 StoryMenagerie.LogError(ex);
@@ -145,11 +151,12 @@ public class StoryMenagerie : BaseUnityPlugin
                 RegisterPlayableCreature(DLCSharedEnums.CreatureTemplateType.ScavengerElite, CreatureTemplate.Type.Scavenger);
                 RegisterPlayableCreature(DLCSharedEnums.CreatureTemplateType.Yeek, DLCSharedEnums.CreatureTemplateType.Yeek);
                 RegisterPlayableCreature(DLCSharedEnums.CreatureTemplateType.TerrorLongLegs, CreatureTemplate.Type.DaddyLongLegs);
+                RegisterPlayableCreature(DLCSharedEnums.CreatureTemplateType.AquaCenti, CreatureTemplate.Type.Centipede);
             }
             if (ModManager.MSC)
             {
                 RegisterPlayableCreature(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.TrainLizard, CreatureTemplate.Type.LizardTemplate);
-                RegisterPlayableCreature(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, null);
+                RegisterPlayableCreature(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, CreatureTemplate.Type.Slugcat);
                 RegisterPlayableCreature(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.ScavengerKing, CreatureTemplate.Type.Scavenger);
                 RegisterPlayableCreature(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.FireBug, CreatureTemplate.Type.EggBug);
             }
@@ -159,6 +166,7 @@ public class StoryMenagerie : BaseUnityPlugin
                 RegisterPlayableCreature(WatcherEnums.CreatureTemplateType.BasiliskLizard, CreatureTemplate.Type.LizardTemplate);
                 RegisterPlayableCreature(WatcherEnums.CreatureTemplateType.IndigoLizard, CreatureTemplate.Type.LizardTemplate);
                 RegisterPlayableCreature(WatcherEnums.CreatureTemplateType.ScavengerTemplar, CreatureTemplate.Type.Scavenger);
+                RegisterPlayableCreature(WatcherEnums.CreatureTemplateType.Barnacle, WatcherEnums.CreatureTemplateType.Barnacle);
             }
             if (ModManager.ActiveMods.Any(mod => mod.id == "fruitortreat"))
             {
@@ -228,37 +236,46 @@ public class StoryMenagerie : BaseUnityPlugin
         orig(self);
         Enums.Register();
         edibleFood = new();
-        var lampsterFood = new List<Type>()
+        List<Type> lampsterFood = new()
         {
             typeof(DangleFruit)
         };
-        var jetfishFood = new List<Type>()
+        List<Type> jetfishFood = new()
         {
             typeof(DangleFruit),
             typeof(SwollenWaterNut)
         };
-        var scavengerFood = new List<Type>()
+        List<Type> scavengerFood = new()
         {
             typeof(DangleFruit),
             typeof(JellyFish)
         };
         if (ModManager.DLCShared)
         {
-            lampsterFood.Add(typeof(GooieDuck));
-            lampsterFood.Add(typeof(GlowWeed));
-            jetfishFood.Add(typeof(GooieDuck));
-            jetfishFood.Add(typeof(GlowWeed));
-            jetfishFood.Add(typeof(LillyPuck));
-            scavengerFood.Add(typeof(GooieDuck));
-            scavengerFood.Add(typeof(DandelionPeach));
-            scavengerFood.Add(typeof(GlowWeed));
+            lampsterFood.AddRange(new List<Type>()
+            {
+                typeof(MoreSlugcats.GooieDuck),
+                typeof(MoreSlugcats.GlowWeed)
+            });
+            jetfishFood.AddRange(new List<Type>()
+            {
+                typeof(MoreSlugcats.GooieDuck),
+                typeof(MoreSlugcats.GlowWeed),
+                typeof(MoreSlugcats.LillyPuck)
+            });
+            scavengerFood.AddRange(new List<Type>()
+            {
+                typeof(MoreSlugcats.GooieDuck),
+                typeof(MoreSlugcats.GlowWeed),
+                typeof(MoreSlugcats.DandelionPeach)
+            });
         }
         edibleFood.Add(CreatureTemplate.Type.LanternMouse, lampsterFood);
         edibleFood.Add(CreatureTemplate.Type.JetFish, jetfishFood);
         edibleFood.Add(CreatureTemplate.Type.Scavenger, scavengerFood);
         if (ModManager.DLCShared)
         {
-            var yeekFood = new List<Type>()
+            List<Type> yeekFood = new()
             {
                 typeof(DangleFruit),
                 typeof(GooieDuck),
@@ -267,6 +284,8 @@ public class StoryMenagerie : BaseUnityPlugin
             };
             edibleFood.Add(DLCSharedEnums.CreatureTemplateType.Yeek, yeekFood);
         }
+
+        // NOTE: y- you may want to just make them register via a function? this seems hacky imo
         var iEdibleList = new List<Type>();
         // thanks rain meadow, referenced their rpc setup
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
