@@ -287,6 +287,10 @@ public static class MeadowHooks
                 x => x.MatchLdfld<PlayerSpecificOnlineHud>(nameof(PlayerSpecificOnlineHud.abstractPlayer)),
                 x => x.MatchCallvirt<AbstractCreature>("get_realizedCreature"),
                 x => x.MatchIsinst<Player>(),
+                x => x.MatchStloc(12),
+                x => x.MatchLdloc(12),
+                x => x.MatchLdnull(),
+                x => x.MatchCgtUn(),
                 x => x.MatchStloc(13)
             );
             var c2 = c;
