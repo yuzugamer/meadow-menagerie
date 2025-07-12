@@ -35,7 +35,7 @@
         </Reference>
     </ItemGroup>
 
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
 		<Exec Command="xcopy &quot;$(ProjectDir)\bin&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Rain World\RainWorld_Data\StreamingAssets\mods\creaturestory\plugins&quot; /s /i /y /q" />
 	</Target>
 </Project>
