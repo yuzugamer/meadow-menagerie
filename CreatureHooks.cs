@@ -245,13 +245,13 @@ public static class CreatureHooks
                             var game = Custom.rainWorld.processManager.currentMainLoop as RainWorldGame;
                             if (game.session is StoryGameSession story && menagerie.foodPoints < story.characterStats.maxFood)
                             {
-                                if (acrit.creatureTemplate.meatPoints == 0 && acrit.realizedCreature != null && acrit.realizedCreature is IPlayerEdible edible)
+                                if (acrit.realizedCreature != null && acrit.realizedCreature is IPlayerEdible edible && edible.FoodPoints > acrit.creatureTemplate.meatPoints)
                                 {
                                     crit.AddFood(edible.FoodPoints, 1f);
                                 }
                                 else
                                 {
-                                    crit.AddFood(acrit.creatureTemplate.meatPoints, 1f);
+                                    crit.AddFood(acrit.state.meatLeft, 1f);
                                 }
                             }
                             else if (self.IsLocal())

@@ -15,7 +15,6 @@ namespace StoryMenagerie.Creatures
         public bool lastJump;
         public bool lastSpec;
         public int specCooldown;
-        public float jawCounter;
         public bool putDown;
         //public int foodInStomach { get; set; }
 
@@ -38,161 +37,167 @@ namespace StoryMenagerie.Creatures
         {
             if (lizard.grasps[0] != null || !lizard.Consious)
             {
+                StoryMenagerie.Debug("lizard inelligible to bite!");
                 return;
             }
-            if (lizard.JawReadyForBite)
-            {
+            StoryMenagerie.Debug("attempting lizard bite!");
+            //if (lizard.JawReadyForBite)
+            //{
 
-                var lizPos = lizard.mainBodyChunk.pos;
-                var dist = lizard.lizardParams.attemptBiteRadius + 5f;
-                var compare = dist;
-                PhysicalObject target = null;
-                /*foreach (var layer in lizard.room.physicalObjects)
+            var lizPos = lizard.mainBodyChunk.pos;
+            var dist = lizard.lizardParams.attemptBiteRadius + 5f;
+            var compare = dist;
+            PhysicalObject target = null;
+            /*foreach (var layer in lizard.room.physicalObjects)
+            {
+                foreach (var obj in layer)
                 {
-                    foreach (var obj in layer)
+                    if (obj != lizard)
                     {
-                        if (obj != lizard)
+                        var crit = obj as Creature;
+                        var isCrit = crit != null;
+                        var chunk = isCrit ? crit.mainBodyChunk : obj.firstChunk;
+                        var tempDist = Vector2.Distance(lizPos, chunk.pos);
+                        if (tempDist < dist)
                         {
-                            var crit = obj as Creature;
-                            var isCrit = crit != null;
-                            var chunk = isCrit ? crit.mainBodyChunk : obj.firstChunk;
-                            var tempDist = Vector2.Distance(lizPos, chunk.pos);
-                            if (tempDist < dist)
-                            {
-                                // prioritize creatures that lizard would normally attack
-                                if (isCrit) dist = (!lizard.AI.DynamicRelationship(crit.abstractCreature).GoForKill ? tempDist : tempDist * 1.2f);
-                                // heavily priortize creatures over objects
-                                else dist = tempDist * 100f;
-                                target = obj;
-                                StoryMenagerie.Debug("bite target set");
-                            } else
-                            {
-                                StoryMenagerie.Debug("bite target not set");
-                            }
-                        }
-                    }
-                }*/
-                foreach (var layer in creature.room.physicalObjects)
-                {
-                    foreach (var obj in layer)
-                    {
-                        if (obj != null && obj != creature && (obj.abstractPhysicalObject.rippleLayer == creature.abstractPhysicalObject.rippleLayer || obj.abstractPhysicalObject.rippleBothSides || creature.abstractPhysicalObject.rippleBothSides) /*&& (obj is not PlayerCarryableItem carryable || carryable.forbiddenToPlayer < 1)*/ && Custom.DistLess(lizPos, obj.bodyChunks[0].pos, obj.bodyChunks[0].rad + dist))// && (Custom.DistLess(creature.bodyChunks[0].pos, obj.bodyChunks[0].pos, obj.bodyChunks[0].rad + (dist / 2f)) || creature.room.VisualContact(creature.bodyChunks[0].pos, obj.bodyChunks[0].pos)) /*&& creature.CanIPickThisUp(obj)*/)
+                            // prioritize creatures that lizard would normally attack
+                            if (isCrit) dist = (!lizard.AI.DynamicRelationship(crit.abstractCreature).GoForKill ? tempDist : tempDist * 1.2f);
+                            // heavily priortize creatures over objects
+                            else dist = tempDist * 100f;
+                            target = obj;
+                            StoryMenagerie.Debug("bite target set");
+                        } else
                         {
-                            var tdist = Vector2.Distance(creature.bodyChunks[0].pos, obj.bodyChunks[0].pos);
-                            if (obj is Spear spear)
-                            {
-                                if (spear.abstractSpear.stuckInWall)
-                                {
-                                    continue;
-                                }
-                                if (obj is Creature crit)
-                                {
-                                    if (!lizard.AI.DynamicRelationship(crit.abstractCreature).GoForKill)
-                                    {
-                                        tdist *= 1.2f;
-                                    }
-                                }
-                                else
-                                {
-                                    tdist *= 100f;
-                                }
-                            }
-                            if (tdist < compare)
-                            {
-                                target = obj;
-                                compare = tdist;
-                            }
+                            StoryMenagerie.Debug("bite target not set");
                         }
                     }
                 }
-                bool success = false;
-                if (target != null)
+            }*/
+            foreach (var layer in creature.room.physicalObjects)
+            {
+                foreach (var obj in layer)
                 {
-                    if ((!ModManager.MSC || lizard.Template.type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.TrainLizard) && lizard.tongue != null && lizard.tongue.Out)
+                    if (obj != null && obj != creature && (obj.abstractPhysicalObject.rippleLayer == creature.abstractPhysicalObject.rippleLayer || obj.abstractPhysicalObject.rippleBothSides || creature.abstractPhysicalObject.rippleBothSides) /*&& (obj is not PlayerCarryableItem carryable || carryable.forbiddenToPlayer < 1)*/ && Custom.DistLess(lizPos, obj.bodyChunks[0].pos, obj.bodyChunks[0].rad + dist))// && (Custom.DistLess(creature.bodyChunks[0].pos, obj.bodyChunks[0].pos, obj.bodyChunks[0].rad + (dist / 2f)) || creature.room.VisualContact(creature.bodyChunks[0].pos, obj.bodyChunks[0].pos)) /*&& creature.CanIPickThisUp(obj)*/)
                     {
-                        if (lizard.tongue.state != LizardTongue.State.StuckInTerrain)
+                        var tdist = Vector2.Distance(creature.bodyChunks[0].pos, obj.bodyChunks[0].pos);
+                        if (obj is Spear spear)
                         {
-                            lizard.tongue.Retract();
-                        }
-                        StoryMenagerie.Debug("tongue out, can't bite");
-                        return;
-                    }
-                    StoryMenagerie.Debug("attempting bite");
-                    var headPos = lizard.mainBodyChunk.pos + Custom.DirVec(lizard.bodyChunks[1].pos, lizard.mainBodyChunk.pos) * lizard.lizardParams.biteInFront;
-                    var cDist = float.MaxValue;
-                    var leniency = 3f * lizard.lizardParams.headSize;
-                    BodyChunk bitChunk = null;
-                    foreach (var chunk in target.bodyChunks)
-                    {
-                        var chunkDist = (headPos - chunk.pos).magnitude;
-                        if (chunkDist < cDist && chunkDist < (chunk.rad + lizard.lizardParams.biteRadBonus) * leniency)
-                        {
-                            bitChunk = chunk;
-                            cDist = chunkDist;
-                        }
-                        else
-                        {
-                            //StoryMenagerie.Debug("distance is " + ((lizard.mainBodyChunk.pos + Custom.DirVec(lizard.bodyChunks[1].pos, lizard.mainBodyChunk.pos) * lizard.lizardParams.biteInFront - chunk.pos).magnitude) + ", under " + ((chunk.rad + lizard.lizardParams.biteRadBonus) * 3f));
-                        }
-                    }
-                    if (bitChunk != null)
-                    {
-                        success = true;
-                        StoryMenagerie.Debug("lizard bite!");
-                        lizard.jawOpen = 1f;
-                        lizard.Bite(bitChunk);
-                        if (bitChunk.owner is KarmaFlower flower)
-                        {
-                            var game = lizard.room.game;
-                            (game.session as StoryGameSession).saveState.deathPersistentSaveData.reinforcedKarma = true;
-                            game.cameras[0].hud.karmaMeter.reinforceAnimation = 0;
-                            if (!OnlineManager.lobby.isOwner)
+                            if (spear.abstractSpear.stuckInWall)
                             {
-                                OnlineManager.lobby.owner.InvokeRPC(StoryRPCs.ReinforceKarma);
+                                continue;
                             }
-                            foreach (OnlinePlayer player in OnlineManager.players)
+                            if (obj is Creature crit)
                             {
-                                if (!player.isMe)
+                                if (!lizard.AI.DynamicRelationship(crit.abstractCreature).GoForKill)
                                 {
-                                    player.InvokeRPC(StoryRPCs.PlayReinforceKarmaAnimation);
+                                    tdist *= 1.2f;
                                 }
                             }
-                            // just in case
-                            if (lizard.grasps[0] != null) lizard.grasps[0].Release();
-                            flower.Destroy();
+                            else
+                            {
+                                tdist *= 100f;
+                            }
                         }
+                        if (tdist < compare)
+                        {
+                            target = obj;
+                            compare = tdist;
+                        }
+                    }
+                }
+            }
+            bool success = false;
+            if (target != null)
+            {
+                if ((!ModManager.MSC || lizard.Template.type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.TrainLizard) && lizard.tongue != null && lizard.tongue.Out)
+                {
+                    if (lizard.tongue.state != LizardTongue.State.StuckInTerrain)
+                    {
+                        lizard.tongue.Retract();
+                    }
+                    StoryMenagerie.Debug("tongue out, can't bite");
+                    return;
+                }
+                StoryMenagerie.Debug("found creature to bite");
+                var headPos = lizard.mainBodyChunk.pos + Custom.DirVec(lizard.bodyChunks[1].pos, lizard.mainBodyChunk.pos) * lizard.lizardParams.biteInFront;
+                var cDist = float.MaxValue;
+                var leniency = 3f * lizard.lizardParams.headSize;
+                BodyChunk bitChunk = null;
+                foreach (var chunk in target.bodyChunks)
+                {
+                    var chunkDist = (headPos - chunk.pos).magnitude;
+                    if (chunkDist < cDist && chunkDist < (chunk.rad + lizard.lizardParams.biteRadBonus) * leniency)
+                    {
+                        bitChunk = chunk;
+                        cDist = chunkDist;
+                    }
+                    else
+                    {
+                        //StoryMenagerie.Debug("distance is " + ((lizard.mainBodyChunk.pos + Custom.DirVec(lizard.bodyChunks[1].pos, lizard.mainBodyChunk.pos) * lizard.lizardParams.biteInFront - chunk.pos).magnitude) + ", under " + ((chunk.rad + lizard.lizardParams.biteRadBonus) * 3f));
+                    }
+                }
+                if (bitChunk != null)
+                {
+                    success = true;
+                    StoryMenagerie.Debug("biting creature!");
+                    lizard.jawOpen = 1f;
+                    lizard.Bite(bitChunk);
+                    if (bitChunk.owner is KarmaFlower flower)
+                    {
+                        var game = lizard.room.game;
+                        (game.session as StoryGameSession).saveState.deathPersistentSaveData.reinforcedKarma = true;
+                        game.cameras[0].hud.karmaMeter.reinforceAnimation = 0;
+                        if (!OnlineManager.lobby.isOwner)
+                        {
+                            OnlineManager.lobby.owner.InvokeRPC(StoryRPCs.ReinforceKarma);
+                        }
+                        foreach (OnlinePlayer player in OnlineManager.players)
+                        {
+                            if (!player.isMe)
+                            {
+                                player.InvokeRPC(StoryRPCs.PlayReinforceKarmaAnimation);
+                            }
+                        }
+                        // just in case
+                        if (lizard.grasps[0] != null) lizard.grasps[0].Release();
+                        flower.Destroy();
                     }
                 }
                 else
                 {
-                    StoryMenagerie.Debug("no bite target found");
-                    lizard.Bite(null);
-                }
-                if (lizard.LegsGripping > 0)
-                {
-                    if (success)
-                    {
-                        foreach (var chunk in lizard.bodyChunks)
-                        {
-                            //chunk.vel += Custom.DegToVec(UnityEngine.Random.value * 360f) * 7f;
-                        }
-                        return;
-                    }
-                    if (target != null && (lizard.tongue == null || !lizard.tongue.Out))
-                    {
-                        //lizard.mainBodyChunk.vel += Custom.DirVec(lizard.mainBodyChunk.pos, target.mainBodyChunk.pos) * 3f * lizard.lizardParams.biteHomingSpeed;
-                        //lizard.bodyChunks[1].vel -= Custom.DirVec(lizard.mainBodyChunk.pos, target.mainBodyChunk.pos) * lizard.lizardParams.biteHomingSpeed;
-                        //lizard.bodyChunks[2].vel -= Custom.DirVec(lizard.mainBodyChunk.pos, target.mainBodyChunk.pos) * lizard.lizardParams.biteHomingSpeed;
-                    }
+                    StoryMenagerie.Debug("couldn't find chunk to bite! defaulting to first chunk");
+                    lizard.Bite(target.firstChunk);
                 }
             }
+            else
+            {
+                StoryMenagerie.Debug("no bite target found");
+                lizard.Bite(null);
+            }
+            if (lizard.LegsGripping > 0)
+            {
+                if (success)
+                {
+                    foreach (var chunk in lizard.bodyChunks)
+                    {
+                        //chunk.vel += Custom.DegToVec(UnityEngine.Random.value * 360f) * 7f;
+                    }
+                    return;
+                }
+                if (target != null && (lizard.tongue == null || !lizard.tongue.Out))
+                {
+                    //lizard.mainBodyChunk.vel += Custom.DirVec(lizard.mainBodyChunk.pos, target.mainBodyChunk.pos) * 3f * lizard.lizardParams.biteHomingSpeed;
+                    //lizard.bodyChunks[1].vel -= Custom.DirVec(lizard.mainBodyChunk.pos, target.mainBodyChunk.pos) * lizard.lizardParams.biteHomingSpeed;
+                    //lizard.bodyChunks[2].vel -= Custom.DirVec(lizard.mainBodyChunk.pos, target.mainBodyChunk.pos) * lizard.lizardParams.biteHomingSpeed;
+                }
+            }
+            //}
         }
 
         public override void ConsciousUpdate()
         {
-            lockInPlace = input[0].thrw && (((!ModManager.MSC || lizard.Template.type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.TrainLizard) && lizard.tongue != null) || lizard.AI.redSpitAI != null);
             base.ConsciousUpdate();
-
+            lockInPlace = input[0].thrw && (((!ModManager.MSC || lizard.Template.type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.TrainLizard) && lizard.tongue != null) || lizard.AI.redSpitAI != null);
             lockInPlace = input[0].thrw && (lizard.tongue != null || lizard.AI.redSpitAI != null);
             if (input[0].pckp)
             {
@@ -202,8 +207,7 @@ namespace StoryMenagerie.Creatures
                     {
                         // who even knows
                         //lizard.jawOpen = Mathf.Clamp(lizard.jawOpen + Mathf.Lerp((1f / (lizard.jawOpen > 0.75f ? (lizard.lizardParams.biteDelay + 2) : ((lizard.lizardParams.biteDelay + 1) / 2))), (1f - lizard.jawOpen) * 0.04f, Mathf.Pow(lizard.jawOpen, 1.6f)), 0f, 1f);
-                        jawCounter = Mathf.Clamp(jawCounter + Mathf.Lerp((1f / (jawCounter > 0.75f ? (lizard.lizardParams.biteDelay + 3) : ((lizard.lizardParams.biteDelay + 2) / 2))), (1f - jawCounter) * 0.075f, (jawCounter / 1.35f)), 0f, 1f);
-                        lizard.jawOpen = jawCounter;
+                        lizard.jawOpen = Mathf.Clamp(lizard.jawOpen + Mathf.Lerp((1f / (lizard.jawOpen > 0.75f ? (lizard.lizardParams.biteDelay + 3) : ((lizard.lizardParams.biteDelay + 2) / 2))), (1f - lizard.jawOpen) * 0.075f, (lizard.jawOpen / 1.35f)), 0f, 1f);
                         grabHeld++;
                     }
                     else if (input[0].y < 0)
@@ -219,14 +223,13 @@ namespace StoryMenagerie.Creatures
             {
                 putDown = false;
                 lizard.jawOpen -= 0.01f;
-                jawCounter = Mathf.Min(0f, jawCounter - 0.01f);
                 if (grabHeld > 0)
                 {
                     StoryMenagerie.Debug("held for " + grabHeld + ", bite delay is " + lizard.lizardParams.biteDelay);
                     var pos = lizard.mainBodyChunk.pos;
                     if (lizard.grasps[0] == null)
                     {
-                        if ((lizard.jawOpen > 0.25f || grabHeld >= lizard.lizardParams.biteDelay / 10f))
+                        if ((lizard.jawOpen > 0.75f))// || grabHeld >= lizard.lizardParams.biteDelay / 10f))
                         {
                             lizard.jawOpen = 1f;
                             TryBite();
@@ -512,7 +515,6 @@ namespace StoryMenagerie.Creatures
             }
             if (!lizard.Consious)
             {
-                jawCounter = Mathf.Min(0f, jawCounter - 0.01f);
                 putDown = false;
             }
         }

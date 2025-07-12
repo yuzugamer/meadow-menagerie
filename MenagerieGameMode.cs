@@ -196,11 +196,14 @@ public class MenagerieGameMode : StoryGameMode
             }
             else
             {
-                if (devTools) StoryMenagerie.Debug("not ready for win, " + inGameClientsData.Count() + " in game clients with data");
-                foreach (var cs in inGameClients)
+                if (devTools)
                 {
-                    var scs = cs.GetData<StoryClientSettingsData>();
-                    StoryMenagerie.Debug($"{cs.owner} ready for win: {scs.readyForWin}");
+                    StoryMenagerie.Debug("not ready for win, " + inGameClientsData.Count() + " in game clients with data");
+                    foreach (var cs in inGameClients)
+                    {
+                        var scs = cs.GetData<StoryClientSettingsData>();
+                        StoryMenagerie.Debug($"{cs.owner} ready for win: {scs.readyForWin}");
+                    }
                 }
             }
 
