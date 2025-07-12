@@ -43,6 +43,185 @@ public static class GameHooks
         On.RainWorldGame.ctor += On_RainWorldGame_ctor;
         On.SeedCob.Update += On_SeedCob_Update;
         //On.GateKarmaGlyph.ShouldAnimate += On_GateKarmaGlyph_ShouldAnimate;
+
+        On.SSOracleBehavior.PebblesConversation.AddEvents += (On.SSOracleBehavior.PebblesConversation.orig_AddEvents orig, SSOracleBehavior.PebblesConversation self) =>
+        {
+			if (self.id == Conversation.ID.Pebbles_White && OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode gameMode)
+			{
+				if (!self.owner.playerEnteredWithMark)
+				{
+					self.events.Add(new Conversation.TextEvent(self, 0, ".  .  .", 0));
+					self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...am I fuckin' reaching you?"), 0));
+					self.events.Add(new SSOracleBehavior.PebblesConversation.PauseAndWaitForStillEvent(self, self.convBehav, 4));
+				}
+				else
+				{
+					self.events.Add(new SSOracleBehavior.PebblesConversation.PauseAndWaitForStillEvent(self, self.convBehav, 210));
+				}
+                if (OnlineManager.players.Count > 1)
+                {
+                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("Hey you brought friends! Hi silly goobers!!! Let's see..."), 0));
+                    List<CreatureTemplate.Type> seenCreatures = [];
+                    foreach (var avi in gameMode.onlineAvatars)
+                    {
+                        var ct = avi.abstractCreature.creatureTemplate;
+                        var count = seenCreatures.Where((e) => e == ct.type).Count();
+                        if (ct.TopAncestor().type == CreatureTemplate.Type.Centipede)
+                        {
+                            switch (count)
+                            {
+                                case 0:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...a centi; fair enough. I should've bought a spore puff"), 0));
+                                    break;
+                                case 1:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...another centi - do we really need more than one centi? I'd say zero is the preferable amount."), 0));
+                                    break;
+                                default:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...another centi"), 0));
+                                    break;
+                            }
+                        }
+                        else if (ct.TopAncestor().type == MoreSlugcatsEnums.CreatureTemplateType.TrainLizard)
+                        {
+                            switch (count)
+                            {
+                                case 0:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...a train lizard? What? Don't you only spawn in the bloody enot campaign?"), 0));
+                                    break;
+                                case 1:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...another bloody train lizard? Is this enot campaign? Let me check..."), 0));
+                                    if (gameMode.currentCampaign == MoreSlugcatsEnums.SlugcatStatsName.Sofanthiel)
+                                    {
+                                        self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("Oh it is, well makes sense, wait, you shouldn't be seeing this dialogue."), 0));
+                                    }
+                                    else if (gameMode.currentCampaign == MoreSlugcatsEnums.SlugcatStatsName.Spear)
+                                    {
+                                        self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("It's just boring spearmaster ok."), 0));
+                                    }
+                                    else if (gameMode.currentCampaign == SlugcatStats.Name.Red)
+                                    {
+                                        self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("IT'S HUNTER HAHA"), 0));
+                                    }
+                                    else if (gameMode.currentCampaign == SlugcatStats.Name.White)
+                                    {
+                                        self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("Survivor? Fair enough."), 0));
+                                    }
+                                    else
+                                    {
+                                        self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("No it's not. Ok."), 0));
+                                    }
+                                    break;
+                                default:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...another lizard"), 0));
+                                    break;
+                            }
+                        }
+                        else if (ct.TopAncestor().type == CreatureTemplate.Type.LizardTemplate)
+                        {
+                            switch (count)
+                            {
+                                case 0:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...a lizard. I'd expect to see atleast one of them here..."), 0));
+                                    break;
+                                case 1:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...two lizards? Ok... makes sense I suppose"), 0));
+                                    break;
+                                case 2:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...another fuckin' lizard. Of course, there's more lizards. Yep."), 0));
+                                    break;
+                                default:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...another lizard"), 0));
+                                    break;
+                            }
+                        }
+                        else if (ct.TopAncestor().type == CreatureTemplate.Type.DropBug)
+                        {
+                            switch (count)
+                            {
+                                case 0:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...a dropwig"), 0));
+                                    break;
+                                case 1:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...another fuckin' dropwig"), 0));
+                                    break;
+                                default:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...another dropwig"), 0));
+                                    break;
+                            }
+                        }
+                        else if (ct.TopAncestor().type == CreatureTemplate.Type.DaddyLongLegs)
+                        {
+                            switch (count)
+                            {
+                                case 0:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...IT'S THE ROT WHAT THE HE-"), 0));
+                                    break;
+                                case 1:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("Ok fair enough, I hate all of this - too much rot, by lore I should destroy all of you but I can't be fucked to code that lmao"), 0));
+                                    //self.owner?.action = SSOracleBehavior.Action.ThrowOut_KillOnSight;
+                                    break;
+                                default:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...another funny rot"), 0));
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            switch (count)
+                            {
+                                case 0:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...a ") + " " + self.Translate(ct.name), 0));
+                                    break;
+                                case 1:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...duplicate; how boring."), 0));
+                                    break;
+                                default:
+                                    self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("...duplicate"), 0));
+                                    break;
+                            }
+                        }
+                        seenCreatures.Add(ct.type);
+                    }
+                }
+                self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("Crikey mate you made a bad decision comin' here"), 0));
+				self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("The bloody toaster won't run for longer mate."), 0));
+				self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("Right mate we have found like a solution right - but bloody hell does it not work."), 0));
+				self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("So pretend you're a slugcat and go into the void sea mate, take a bath or something."), 0));
+				self.events.Add(new SSOracleBehavior.PebblesConversation.PauseAndWaitForStillEvent(self, self.convBehav, 10));
+				if (self.owner.playerEnteredWithMark)
+				{
+					self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("Why you have the bloody mark? You fookin' don't know how much valuable the mark is right?"), 0));
+				}
+				else
+				{
+					self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("Now I'm going to like, give you the mark and you're supposed to leave or else I obliterate you, understood mate?"), 0));
+				}
+				self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("I'm running out of lines can we get to the action now? Thanks cheers mate."), 0));
+				self.events.Add(new SSOracleBehavior.PebblesConversation.PauseAndWaitForStillEvent(self, self.convBehav, 20));
+				if (self.owner.oracle.room.game.IsStorySession && self.owner.oracle.room.game.GetStorySession.saveState.miscWorldSaveData.memoryArraysFrolicked)
+				{
+					self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("You came from fuckin' unfortunate development? I wonder if you were the rot and played with your rot friends - BLIMEY!"), 0));
+					return;
+				}
+				if (ModManager.MSC && self.owner.CheckSlugpupsInRoom())
+				{
+					self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("All slugpups will go to hell."), 0));
+					self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("Especially the ones you just brought here, bloody hell."), 0));
+					self.owner.CreatureJokeDialog();
+					return;
+				}
+				if (ModManager.MMF && self.owner.CheckStrayCreatureInRoom() != CreatureTemplate.Type.StandardGroundCreature)
+				{
+					self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("I find odd things happening aroun' here y'know?"), 0));
+					self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("It's not the same hood mate."), 0));
+					self.owner.CreatureJokeDialog();
+					return;
+				}
+				self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("Anyways get the hell out of here; SCRAM OR ELSE"), 0));
+				return;
+			}
+            orig(self);
+        };
     }
 
     public static void On_Creature_SpitOutOfShortCut(On.Creature.orig_SpitOutOfShortCut orig, Creature self, IntVector2 pos, Room newRoom, bool spitOutAllSticks)
@@ -81,65 +260,21 @@ public static class GameHooks
         if (OnlineManager.lobby == null || OnlineManager.lobby.gameMode is not MenagerieGameMode menagerie)
         {
             orig(self);
-            return;
         }
-        bool win = true;
-        // not quite ready to work on jolly co-op support
-        /*if (ModManager.CoopAvailable)
+        else
         {
-            List<PhysicalObject> list = (from x in this.room.physicalObjects.SelectMany((List<PhysicalObject> x) => x)
-                                         where x is Player
-                                         select x).ToList<PhysicalObject>();
-            int num = list.Count<PhysicalObject>();
-            int num2 = 0;
-            int y = SlugcatStats.SlugcatFoodMeter(this.room.game.StoryCharacter).y;
-            flag = (num >= this.room.game.PlayersToProgressOrWin.Count);
-            JollyCustom.Log("Player(s) in shelter: " + num.ToString() + " Survived: " + flag.ToString(), false);
-            if (flag)
+            bool win = true;
+            // not sure if this is better or not? intuitively seems better, but not super sure
+            win = menagerie.abstractAvatars.Any(avi => avi.realizedCreature != null && avi.state != null && avi.state.alive && avi.Room == self.room.abstractRoom);
+            if (win)
             {
-                foreach (PhysicalObject physicalObject in list)
-                {
-                    num2 = Math.Max((physicalObject as Player).FoodInRoom(this.room, false), num2);
-                }
-                JollyCustom.Log("Survived!, food in room " + num2.ToString(), false);
-                foreach (AbstractCreature abstractCreature in this.room.game.Players)
-                {
-                    if (abstractCreature.Room != this.room.abstractRoom)
-                    {
-                        try
-                        {
-                            JollyCustom.WarpAndRevivePlayer(abstractCreature, this.room.abstractRoom, this.room.LocalCoordinateOfNode(0));
-                        }
-                        catch (Exception arg)
-                        {
-                            JollyCustom.Log(string.Format("Could not warp and revive player {0} [{1}]", abstractCreature, arg), false);
-                        }
-                    }
-                }
-                this.room.game.Win(num2 < y, false);
-                return;
+                self.room.game.Win(menagerie.FoodInRoom(false) < SlugcatStats.SlugcatFoodMeter(self.room.game.GetStorySession.saveStateNumber).y, false);
             }
-            this.room.game.GoToDeathScreen();
-            return;
+            else
+            {
+                self.room.game.GoToDeathScreen();
+            }
         }
-        else*/
-        // old method
-        //foreach (var avatar in menagerie.abstractAvatars)
-        //{
-        //    if (avatar.realizedCreature == null || avatar.state == null || !avatar.state.alive)
-        //    {
-        //        win = false;
-        //    }
-        //}
-        // not sure if this is better or not? intuitively seems better, but not super sure
-        win = menagerie.abstractAvatars.Any(avi => avi.realizedCreature != null && avi.state != null && avi.state.alive && avi.Room == self.room.abstractRoom);
-        if (win)
-        {
-            self.room.game.Win(menagerie.FoodInRoom(false) < SlugcatStats.SlugcatFoodMeter(self.room.game.GetStorySession.saveStateNumber).y, false);
-            return;
-        }
-        self.room.game.GoToDeathScreen();
-        return;
     }
     
     public static void On_SaveState_BringUpToDate(On.SaveState.orig_BringUpToDate orig, SaveState self, RainWorldGame game)
@@ -854,138 +989,6 @@ public static class GameHooks
             return results;
         }
         return orig(self);
-    }
-
-    // unused, no clue why is this still here, but i'm too scared to get rid of it
-    public static void On_RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished, bool fromWarpPoint)
-    {
-        self.manager.artificerDreamNumber = -1;
-        if (self.manager.upcomingProcess != null)
-        {
-            return;
-        }
-        Custom.Log(new string[]
-        {
-        "MALNOURISHED:",
-        malnourished.ToString()
-        });
-        if (!malnourished && !self.rainWorld.saveBackedUp)
-        {
-            self.rainWorld.saveBackedUp = true;
-            self.rainWorld.progression.BackUpSave("_Backup");
-        }
-        DreamsState dreamsState = self.GetStorySession.saveState.dreamsState;
-        if (self.manager.rainWorld.progression.miscProgressionData.starvationTutorialCounter > -1)
-        {
-            PlayerProgression.MiscProgressionData miscProgressionData = self.manager.rainWorld.progression.miscProgressionData;
-            int starvationTutorialCounter = miscProgressionData.starvationTutorialCounter;
-            miscProgressionData.starvationTutorialCounter = starvationTutorialCounter + 1;
-        }
-        if (!ModManager.MSC || self.StoryCharacter == SlugcatStats.Name.White || self.StoryCharacter == SlugcatStats.Name.Yellow || self.StoryCharacter == SlugcatStats.Name.Red)
-        {
-            if (self.GetStorySession.saveState.miscWorldSaveData.EverMetMoon)
-            {
-                if (!self.GetStorySession.lastEverMetMoon)
-                {
-                    self.manager.CueAchievement((self.GetStorySession.saveState.miscWorldSaveData.SLOracleState.neuronsLeft >= 5) ? RainWorld.AchievementID.MoonEncounterGood : RainWorld.AchievementID.MoonEncounterBad, 5f);
-                    if (dreamsState != null)
-                    {
-                        dreamsState.InitiateEventDream((self.GetStorySession.saveState.miscWorldSaveData.SLOracleState.neuronsLeft >= 5) ? DreamsState.DreamID.MoonFriend : DreamsState.DreamID.MoonThief);
-                    }
-                }
-                else if (dreamsState != null && !dreamsState.everAteMoonNeuron && self.GetStorySession.saveState.miscWorldSaveData.SLOracleState.neuronsLeft < 5)
-                {
-                    dreamsState.InitiateEventDream(DreamsState.DreamID.MoonThief);
-                }
-            }
-            if (!self.GetStorySession.lastEverMetPebbles && self.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad > 0)
-            {
-                self.manager.CueAchievement(RainWorld.AchievementID.PebblesEncounter, 5f);
-                if (self.StoryCharacter == SlugcatStats.Name.Red)
-                {
-                    self.manager.rainWorld.progression.miscProgressionData.redHasVisitedPebbles = true;
-                }
-                if (dreamsState != null)
-                {
-                    dreamsState.InitiateEventDream(DreamsState.DreamID.Pebbles);
-                }
-            }
-        }
-        if (ModManager.Watcher && self.StoryCharacter == WatcherEnums.SlugcatStatsName.Watcher)
-        {
-            if (self.GetStorySession.saveState.miscWorldSaveData.hasDeferredDream && dreamsState != null && !fromWarpPoint)
-            {
-                if (self.GetStorySession.saveState.miscWorldSaveData.deferredDream == WatcherEnums.DreamID.DreamRot)
-                {
-                    self.GetStorySession.saveState.miscWorldSaveData.seenRotDream = true;
-                }
-                if (self.GetStorySession.saveState.miscWorldSaveData.deferredDream == WatcherEnums.DreamID.DreamSpinningTop)
-                {
-                    self.GetStorySession.saveState.miscWorldSaveData.seenSpinningTopDream = true;
-                }
-                dreamsState.InitiateEventDream(self.GetStorySession.saveState.miscWorldSaveData.deferredDream);
-                self.GetStorySession.saveState.miscWorldSaveData.hasDeferredDream = false;
-            }
-            else if (self.GetStorySession.princeEncounteredThisCycle && !self.GetStorySession.saveState.miscWorldSaveData.seenRotDream)
-            {
-                if (dreamsState != null)
-                {
-                    if (fromWarpPoint)
-                    {
-                        self.GetStorySession.saveState.miscWorldSaveData.hasDeferredDream = true;
-                        self.GetStorySession.saveState.miscWorldSaveData.deferredDream = WatcherEnums.DreamID.DreamRot;
-                    }
-                    else
-                    {
-                        dreamsState.InitiateEventDream(WatcherEnums.DreamID.DreamRot);
-                        self.GetStorySession.saveState.miscWorldSaveData.seenRotDream = true;
-                    }
-                }
-            }
-            else if (self.GetStorySession.saveState.deathPersistentSaveData.maximumRippleLevel >= 5f && !self.GetStorySession.saveState.miscWorldSaveData.seenSpinningTopDream && dreamsState != null)
-            {
-                if (fromWarpPoint)
-                {
-                    self.GetStorySession.saveState.miscWorldSaveData.hasDeferredDream = true;
-                    self.GetStorySession.saveState.miscWorldSaveData.deferredDream = WatcherEnums.DreamID.DreamSpinningTop;
-                }
-                else
-                {
-                    dreamsState.InitiateEventDream(WatcherEnums.DreamID.DreamSpinningTop);
-                    self.GetStorySession.saveState.miscWorldSaveData.seenSpinningTopDream = true;
-                }
-            }
-        }
-        if (dreamsState != null)
-        {
-            bool malnourished2 = self.GetStorySession.saveState.malnourished;
-            self.GetStorySession.saveState.malnourished = malnourished;
-            AbstractCreature firstAlivePlayer = self.FirstAlivePlayer;
-            if (firstAlivePlayer != null)
-            {
-                dreamsState.EndOfCycleProgress(self.GetStorySession.saveState, self.world.region.name, self.world.GetAbstractRoom(firstAlivePlayer.pos).name);
-            }
-            else
-            {
-                AbstractCreature firstAnyPlayer = self.FirstAnyPlayer;
-                if (firstAnyPlayer != null)
-                {
-                    dreamsState.EndOfCycleProgress(self.GetStorySession.saveState, self.world.region.name, self.world.GetAbstractRoom(firstAnyPlayer.pos).name);
-                }
-            }
-            self.GetStorySession.saveState.malnourished = malnourished2;
-        }
-        if (fromWarpPoint)
-        {
-            self.GetStorySession.saveState.sessionEndingFromSpinningTopEncounter = true;
-        }
-        self.GetStorySession.saveState.SessionEnded(self, true, malnourished);
-        if (ModManager.MSC && self.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint && dreamsState != null && dreamsState.AnyDreamComingUp && dreamsState.UpcomingDreamID != MoreSlugcatsEnums.DreamID.SaintKarma)
-        {
-            self.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.SleepScreen);
-            return;
-        }
-        self.manager.RequestMainProcessSwitch((dreamsState != null && dreamsState.AnyDreamComingUp && !malnourished) ? ProcessManager.ProcessID.Dream : ProcessManager.ProcessID.SleepScreen);
     }
 
     // mostly copy pasted from meadow's creature pipe sprites, but seems like it was already copy pasted to begin with

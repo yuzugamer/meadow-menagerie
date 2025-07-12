@@ -120,7 +120,7 @@ public class MenagerieGameMode : StoryGameMode
         abstractCreature = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(selectedCreature), null, location, id);
         if (selectedCreature == CreatureTemplate.Type.Slugcat)
         {
-            abstractCreature.state = new PlayerState(abstractCreature, 0, avatarSettings.playingAs, false);
+            abstractCreature.state = new PlayerState(abstractCreature, 0, avatarSettings[0].playingAs, false);
             game.session.AddPlayer(abstractCreature);
         }
         else
@@ -145,7 +145,7 @@ public class MenagerieGameMode : StoryGameMode
     public override void ConfigureAvatar(OnlineCreature onlineCreature)
     {
 		var type = onlineCreature.abstractCreature.creatureTemplate.type;
-        if (type != CreatureTemplate.Type.Slugcat && (!ModManager.MSC || type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC)) avatarSettings.wearingCape = false;
+        if (type != CreatureTemplate.Type.Slugcat && (!ModManager.MSC || type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC)) avatarSettings[0].wearingCape = false;
         base.ConfigureAvatar(onlineCreature);
     }
 
