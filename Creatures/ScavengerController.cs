@@ -26,6 +26,7 @@ namespace StoryMenagerie.Creatures
         //public int forceSleepCounter { get; set; }
         public bool secretMode;
         public int biteCounter;
+        public int throwHeld;
         public ScavengerController(Scavenger scav, OnlineCreature oc, int playerNumber, CreatureCustomization customization) : base(scav, oc, playerNumber, new ExpandedAvatarData(customization))
         {
             secretMode = (OnlineManager.lobby.gameMode as MenagerieGameMode).secretMode;
@@ -90,7 +91,7 @@ namespace StoryMenagerie.Creatures
             {
                 if (!lastGrab)
                 {
-                    if (input[0].x < 0)
+                    if (input[0].y < 0)
                     {
                         if (scavenger.grasps[0] != null)
                         {
@@ -151,26 +152,42 @@ namespace StoryMenagerie.Creatures
 
             if (input[0].thrw)
             {
-                if (!lastThrow)
+                //if (!lastThrow)
+                //{
+                Vector2 aimPosition = this.scavenger.mainBodyChunk.pos + new Vector2(this.scavenger.flip * 250f, (this.scavenger.flip * 125f) * input[0].y);
+                var personality = scavenger.abstractCreature.personality;
+                scavenger.abstractCreature.personality = StoryMenagerie.GamerPersonality;
+                if (scavenger.animation.id != Scavenger.ScavengerAnimation.ID.ThrowCharge)
                 {
-                    Vector2 aimPosition = this.scavenger.mainBodyChunk.pos + new Vector2(this.scavenger.flip * 250f, (this.scavenger.flip * 125f) * input[0].y);
-                    var personality = scavenger.abstractCreature.personality;
-                    scavenger.abstractCreature.personality = StoryMenagerie.GamerPersonality;
-                    //if (scavenger.animation.id != Scavenger.ScavengerAnimation.ID.ThrowCharge)
-                    //{
-                    //scavenger.animation = new Scavenger.ThrowChargeAnimation(scavenger, null);
-                    //scavenger.animation.age = 40;
-                    //(scavenger.animation as Scavenger.ThrowChargeAnimation).aimTarget = aimPosition;
-                    //}
-                    this.scavenger.TryThrow(null, ScavengerAI.ViolenceType.Lethal, aimPosition);
-                    //scavenger.Throw(aimPosition);
-                    scavenger.abstractCreature.personality = personality;
+                    scavenger.animation = new Scavenger.ThrowChargeAnimation(scavenger, null);
+                    scavenger.animation.age = 0;
+                    (scavenger.animation as Scavenger.ThrowChargeAnimation).aimTarget = aimPosition;
                 }
+                else
+                {
+                    scavenger.animation.age = 0;
+                }
+                    this.scavenger.TryThrow(null, ScavengerAI.ViolenceType.Lethal, aimPosition);
+                //scavenger.Throw(aimPosition);
+                scavenger.abstractCreature.personality = personality;
+                //}
                 lastThrow = true;
+                throwHeld++;
             }
             else
             {
                 lastThrow = false;
+                if (throwHeld < 9)
+                {
+                    Vector2 aimPosition = this.scavenger.mainBodyChunk.pos + new Vector2(this.scavenger.flip * 250f, (this.scavenger.flip * 125f) * input[0].y);
+                    if (scavenger.animation.id != Scavenger.ScavengerAnimation.ID.ThrowCharge)
+                    {
+                        scavenger.animation = new Scavenger.ThrowChargeAnimation(scavenger, null);
+                        scavenger.animation.age = 40;
+                        (scavenger.animation as Scavenger.ThrowChargeAnimation).aimTarget = aimPosition;
+                    }
+                    this.scavenger.TryThrow(null, ScavengerAI.ViolenceType.Lethal, aimPosition);
+                }
             }
 
             if (input[0].spec)

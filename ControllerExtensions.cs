@@ -1,4 +1,4 @@
-using RainMeadow;
+﻿using RainMeadow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,28 +7,16 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using RWCustom;
-using static RewiredConsts.Layout;
-using DevInterface;
 using MoreSlugcats;
 using Watcher;
 
 namespace StoryMenagerie;
 
-//public interface IStoryCreatureController
-//{
-    //public Creature GetCreature { get; }
-    //public StoryControllerData scd { get; set; }
-    //public SlugcatCustomization storyCustomization { get; set; }
-    //public int forceSleepCounter { get; set; }
-    //public int foodInStomach { get; set; }
-    //public abstract bool GrabImpl(PhysicalObject pickUpCandidate);
-//}
-
-public static class StoryCreatureController
+public static class ControllerExtensions
 {
-    public static ConditionalWeakTable<CreatureController, StoryCreatureControllerValues> storyControllers = new ConditionalWeakTable<CreatureController, StoryCreatureControllerValues>();
-    public static bool isStory(this CreatureController self, out StoryCreatureControllerValues story) => storyControllers.TryGetValue(self, out story);
-    public static StoryCreatureControllerValues story(this CreatureController self) => storyControllers.GetOrCreateValue(self);
+    public static ConditionalWeakTable<CreatureController, StoryControllerValues> storyControllers = new ConditionalWeakTable<CreatureController, StoryControllerValues>();
+    public static bool isStory(this CreatureController self, out StoryControllerValues story) => storyControllers.TryGetValue(self, out story);
+    public static StoryControllerValues story(this CreatureController self) => storyControllers.GetOrCreateValue(self);
     public static int foodToHibernate(this CreatureController self) => (self.creature.room.game.session is StoryGameSession session) ? SlugcatStats.SlugcatFoodMeter(session.saveState.saveStateNumber).y : 0;
     public static int maxFood(this CreatureController self) => (self.creature.room.game.session is StoryGameSession session) ? SlugcatStats.SlugcatFoodMeter(session.saveState.saveStateNumber).x : 0;
     //public static bool GrabImpl(this CreatureController self, PhysicalObject pickUpCandidate) => (self as IStoryCreatureController).GrabImpl(pickUpCandidate);
@@ -312,7 +300,8 @@ public static class StoryCreatureController
             var newFood = state.foodInStomach;// * 4 + state.quarterFoodPoints;
             if (newFood != origFood) OnlineManager.lobby.owner.InvokeRPC(StoryRPCs.ChangeFood, (short)(newFood - origFood));
         }
-        */if (OnlineManager.lobby == null || OnlineManager.lobby.gameMode is not MenagerieGameMode menagerie) return;
+        */
+        if (OnlineManager.lobby == null || OnlineManager.lobby.gameMode is not MenagerieGameMode menagerie) return;
         var origFood = menagerie.foodPoints * 4 + menagerie.quarterFoodPoints;
 
 
@@ -324,10 +313,11 @@ public static class StoryCreatureController
         //if (scc.foodInStomach < self.creature.room.game.GetStorySession.characterStats.maxFood) scc.foodInStomach++;
         //var newFood = pips * 4 + quarters;
         var newFood = origFood + (food * 4f);
-        if (!OnlineManager.lobby.isOwner )
+        if (!OnlineManager.lobby.isOwner)
         {
             if (newFood != origFood) OnlineManager.lobby.owner.InvokeRPC(MenagerieGameMode.ChangeFood, (short)(newFood - origFood));
-        } else
+        }
+        else
         {
             MenagerieGameMode.ChangeFood((short)(newFood - origFood));
         }
@@ -705,18 +695,4 @@ public static class StoryCreatureController
         }
         // i've yet to get far enough into watcher to add the others don't blame me pls
     }
-}
-
-public class StoryCreatureControllerValues
-{
-    //public StoryControllerData scd;
-    public SlugcatCustomization storyCustomization;
-    public int forceSleepCounter;
-    public bool stillInStartShelter;
-    public PlayerState state;
-    public Creature.Grasp dangerGrasp;
-    public int dangerGraspTime;
-    public WorldCoordinate? karmaFlowerGrowPos;
-    public MarkSprite mark;
-    public bool inVoidSea;
 }

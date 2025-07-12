@@ -106,6 +106,7 @@ public class MenagerieGameMode : StoryGameMode
         {
             lobby.AddData(new MenagerieLobbyData());
         }
+        requireCampaignSlugcat = false;
     }
 
     public override AbstractCreature SpawnAvatar(RainWorldGame game, WorldCoordinate location)

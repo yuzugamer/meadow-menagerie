@@ -15,6 +15,8 @@ namespace StoryMenagerie.Creatures
         public bool lastJump;
         public bool lastSpec;
         public int specCooldown;
+        public float jawCounter;
+        public bool putDown;
         //public int foodInStomach { get; set; }
 
         /*public static void On_Lizard_Act(On.Lizard.orig_Act orig, Lizard self)
@@ -188,21 +190,34 @@ namespace StoryMenagerie.Creatures
 
         public override void ConsciousUpdate()
         {
-            lockInPlace = input[0].thrw && (lizard.tongue != null || lizard.AI.redSpitAI != null);
+            lockInPlace = input[0].thrw && (((!ModManager.MSC || lizard.Template.type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.TrainLizard) && lizard.tongue != null) || lizard.AI.redSpitAI != null);
             base.ConsciousUpdate();
             if (input[0].pckp)
             {
-                if (lizard.grasps[0] == null)
+                if (!putDown)
                 {
-                    // who even knows
-                    //lizard.jawOpen = Mathf.Clamp(lizard.jawOpen + Mathf.Lerp((1f / (lizard.jawOpen > 0.75f ? (lizard.lizardParams.biteDelay + 2) : ((lizard.lizardParams.biteDelay + 1) / 2))), (1f - lizard.jawOpen) * 0.04f, Mathf.Pow(lizard.jawOpen, 1.6f)), 0f, 1f);
-                    lizard.jawOpen = Mathf.Clamp(lizard.jawOpen + Mathf.Lerp((1f / (lizard.jawOpen > 0.75f ? (lizard.lizardParams.biteDelay + 3) : ((lizard.lizardParams.biteDelay + 2) / 2))), (1f - lizard.jawOpen) * 0.075f, (lizard.jawOpen / 1.35f)), 0f, 1f);
+                    if (lizard.grasps[0] == null)
+                    {
+                        // who even knows
+                        //lizard.jawOpen = Mathf.Clamp(lizard.jawOpen + Mathf.Lerp((1f / (lizard.jawOpen > 0.75f ? (lizard.lizardParams.biteDelay + 2) : ((lizard.lizardParams.biteDelay + 1) / 2))), (1f - lizard.jawOpen) * 0.04f, Mathf.Pow(lizard.jawOpen, 1.6f)), 0f, 1f);
+                        jawCounter = Mathf.Clamp(jawCounter + Mathf.Lerp((1f / (jawCounter > 0.75f ? (lizard.lizardParams.biteDelay + 3) : ((lizard.lizardParams.biteDelay + 2) / 2))), (1f - jawCounter) * 0.075f, (jawCounter / 1.35f)), 0f, 1f);
+                        lizard.jawOpen = jawCounter;
+                        grabHeld++;
+                    }
+                    else if (input[0].y < 0)
+                    {
+                        lizard.ReleaseGrasp(0);
+                        lizard.jawOpen += 0.2f;
+                        grabHeld = 0;
+                        putDown = true;
+                    }
                 }
-                grabHeld++;
             }
             else
             {
+                putDown = false;
                 lizard.jawOpen -= 0.01f;
+                jawCounter = Mathf.Min(0f, jawCounter - 0.01f);
                 if (grabHeld > 0)
                 {
                     StoryMenagerie.Debug("held for " + grabHeld + ", bite delay is " + lizard.lizardParams.biteDelay);
@@ -216,12 +231,6 @@ namespace StoryMenagerie.Creatures
                             lizard.biteDelay = 0;
                         }
                         lizard.jawOpen = 0f;
-                    }
-                    else if (grabHeld > 40)
-                    {
-                        lizard.ReleaseGrasp(0);
-                        lizard.jawOpen += 0.2f;
-                        grabHeld = 0;
                     }
                 }
                 grabHeld = 0;
@@ -499,6 +508,11 @@ namespace StoryMenagerie.Creatures
             {
                 lizard.animation = Lizard.Animation.Lounge;
                 lungeTime--;
+            }
+            if (!lizard.Consious)
+            {
+                jawCounter = Mathf.Min(0f, jawCounter - 0.01f);
+                putDown = false;
             }
         }
     }
