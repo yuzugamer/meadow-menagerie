@@ -127,7 +127,6 @@ public class MenagerieGameMode : StoryGameMode
         {
             game.GetStorySession.playerSessionRecords[0] = new PlayerSessionRecord(0);
             game.GetStorySession.playerSessionRecords[0].wokeUpInRegion = game.world.region.name;
-            //StoryCreatureController.AddPlayer(game.session, abstractCreature);
             if (game.session.Players == null || game.session.Players.Count == 0)
             {
                 RainMeadow.RainMeadow.sSpawningAvatar = false;
@@ -252,51 +251,59 @@ public class MenagerieGameMode : StoryGameMode
     {
         if (creature is Lizard liz)
         {
-            new StoryLizardController(liz, oc, 0, customization);
+            new Creatures.LizardController(liz, oc, 0, new CreatureCustomization(customization));
         }
         else if (creature is Scavenger scavy)
         {
-            new StoryScavengerController(scavy, oc, 0, customization);
+            new Creatures.ScavengerController(scavy, oc, 0, new CreatureCustomization(customization));
         }
         else if (creature is NeedleWorm)
         {
-            new StoryNoodleController(creature, oc, 0, customization);
+            new Creatures.NoodleController(creature, oc, 0, new CreatureCustomization(customization));
         }
         else if (creature is EggBug bug)
         {
-            new StoryEggbugController(bug, oc, 0, customization);
+            new Creatures.EggbugController(bug, oc, 0, new CreatureCustomization(customization));
         }
         else if (creature is LanternMouse mouse)
         {
-            new StoryLanternMouseController(mouse, oc, 0, customization);
+            new Creatures.LanternMouseController(mouse, oc, 0, new CreatureCustomization(customization));
         }
         else if (creature is Cicada cicada)
         {
-            new StoryCicadaController(cicada, oc, 0, customization);
+            new Creatures.CicadaController(cicada, oc, 0, new CreatureCustomization(customization));
         }
         else if (creature is Centipede centi)
         {
-            new StoryCentipedeController(centi, oc, 0, customization);
+            new Creatures.CentipedeController(centi, oc, 0, new CreatureCustomization(customization));
         }
         else if (ModManager.DLCShared && creature is MoreSlugcats.Yeek yeek)
         {
-            new StoryYeekController(yeek, oc, 0, customization);
+            new Creatures.YeekController(yeek, oc, 0, new CreatureCustomization(customization));
         }
         else if (ModManager.MSC && creature is Player player && player.isNPC)
         {
-            new StorySlugNPCController(player, oc, 0, customization);
+            new Creatures.SlugNPCController(player, oc, 0, new CreatureCustomization(customization));
         }
         else if (creature is JetFish fish)
         {
-            new StoryJetFishController(fish, oc, 0, customization);
+            new Creatures.JetFishController(fish, oc, 0, new CreatureCustomization(customization));
         }
         else if (creature is BigEel eel)
         {
-            new StoryBigEelController(eel, oc, 0, customization);
+            new Creatures.BigEelController(eel, oc, 0, new CreatureCustomization(customization));
         }
         else if (creature is DaddyLongLegs dll)
         {
-            new LongLegsController(dll, oc, 0, customization);
+            new Creatures.LongLegsController(dll, oc, 0, new CreatureCustomization(customization));
+        }
+        else if (creature is DropBug dropbug)
+        {
+            new Creatures.DropBugController(dropbug, oc, 0, new CreatureCustomization(customization));
+        }
+        else if (creature is Watcher.Barnacle barnacle)
+        {
+            new Creatures.BarnacleController(barnacle, oc, 0, new CreatureCustomization(customization));
         }
         else if (creature is not Player)
         {

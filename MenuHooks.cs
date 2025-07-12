@@ -48,8 +48,7 @@ namespace StoryMenagerie
         {
             if (RainMeadow.RainMeadow.isStoryMode(out var story) && self is MenagerieOnlineMenu menagerie && box.IDString == "HOSTCRITONLY")
             {
-                return;
-                (story as MenagerieGameMode).requiredHostCreature = menagerie.PlayerSelectedCreature;
+                return; (story as MenagerieGameMode).requiredHostCreature = menagerie.PlayerSelectedCreature;
                 return;
             }
             orig(self, box, c);

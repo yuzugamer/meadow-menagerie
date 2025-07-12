@@ -11,6 +11,13 @@ namespace StoryMenagerie;
 
 public class CreatureCustomization : SlugcatCustomization
 {
+    public CreatureCustomization(SlugcatCustomization scc)
+    {
+        this.bodyColor = scc.bodyColor;
+        this.eyeColor = scc.eyeColor;
+        this.currentColors = scc.currentColors;
+    }
+
     public CreatureTemplate.Type selectedCreature;
     public bool[] enabledColors;
     public bool special;

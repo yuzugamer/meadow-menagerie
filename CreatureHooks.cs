@@ -91,7 +91,7 @@ public static class CreatureHooks
 
     public static void On_Lizard_CarryObject(On.Lizard.orig_CarryObject orig, Lizard self, bool eu)
     {
-        //if (CreatureController.creatureControllers.TryGetValue(self, out var liz) && liz is StoryLizardController)
+        //if (CreatureController.creatureControllers.TryGetValue(self, out var liz) && liz is LizardController)
         //{
             //if (UnityEngine.Random.value < 0.025f && (!(self.grasps[0].grabbed is Creature) || self.AI.DynamicRelationship((self.grasps[0].grabbed as Creature).abstractCreature).type != CreatureTemplate.Relationship.Type.Eats))
             //{
@@ -257,7 +257,7 @@ public static class CreatureHooks
                             crit.AddFood(edible.FoodPoints, 1f);
                         }
                     }
-                    else if (crit is LanternMouseController && StoryLanternMouseController.IsEdible(stick.B) && stick.B is IPlayerEdible aEdible)
+                    else if (crit is LanternMouseController && LanternMouseController.IsEdible(stick.B) && stick.B is IPlayerEdible aEdible)
                     {
                         crit.AddFood(aEdible.FoodPoints, 1f);
                     }
@@ -276,7 +276,7 @@ public static class CreatureHooks
 
     public static Vector2? On_LizardAI_LizardSpitTracker_AimPos(On.LizardAI.LizardSpitTracker.orig_AimPos orig, LizardAI.LizardSpitTracker self)
     {
-        if (OnlineManager.lobby != null && self.lizardAI.lizard != null && CreatureController.creatureControllers.TryGetValue(self.lizardAI.lizard, out var cc) && cc is StoryLizardController liz)
+        if (OnlineManager.lobby != null && self.lizardAI.lizard != null && CreatureController.creatureControllers.TryGetValue(self.lizardAI.lizard, out var cc) && cc is LizardController liz)
         {
             StoryMenagerie.Debug("spitpos using inputs");
             if (liz.input[0].x != 0 || liz.input[0].y != 0)
@@ -540,7 +540,7 @@ public static class CreatureHooks
     {
         orig(self);
         // mostly copy pasted code from playergraphics
-        if (self.scavenger != null && CreatureController.creatureControllers.TryGetValue(self.scavenger, out var cc) && cc is StoryScavengerController scavy && scavy.handOnExternalFoodSource != default(Vector2))
+        if (self.scavenger != null && CreatureController.creatureControllers.TryGetValue(self.scavenger, out var cc) && cc is ScavengerController scavy && scavy.handOnExternalFoodSource != default(Vector2))
         {
             var hand = (scavy.handOnExternalFoodSource.x < self.scavenger.mainBodyChunk.pos.x) ? 0 : 1;
             if (scavy.eatExternalFoodSourceCounter < 3)
