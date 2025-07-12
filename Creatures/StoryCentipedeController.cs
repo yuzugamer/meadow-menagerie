@@ -17,8 +17,6 @@ public class StoryCentipedeController : CreatureController
     public StoryCentipedeController(Centipede centi, OnlineCreature oc, int playerNumber, SlugcatCustomization customization) : base(centi, oc, playerNumber, new ExpandedAvatarData(customization))
     {
         this.centi = centi;
-        this.story().storyCustomization = customization;
-        this.customization = new ExpandedAvatarData(customization);
     }
 
     // most of this stuff is just stolen from dr's more creatures, so that i could get an idea of how this stuff works. all of this desperately needs to be redone

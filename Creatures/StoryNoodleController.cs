@@ -19,8 +19,6 @@ public class StoryNoodleController : NoodleController
     public bool isBigNoodle => creature is BigNeedleWorm;
     public StoryNoodleController(Creature creature, OnlineCreature oc, int playerNumber, SlugcatCustomization customization) : base(creature, oc, playerNumber, new ExpandedAvatarData(customization))
     {
-        this.story().storyCustomization = customization;
-        this.customization = new ExpandedAvatarData(customization);
     }
 
     // we love copy pasted code

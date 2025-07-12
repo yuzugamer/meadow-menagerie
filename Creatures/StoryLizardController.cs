@@ -29,7 +29,6 @@ public class StoryLizardController : LizardController//, IStoryCreatureControlle
     }*/
     public StoryLizardController(Lizard lizard, OnlineCreature oc, int playerNumber, SlugcatCustomization customization) : base(lizard, oc, playerNumber, new ExpandedAvatarData(customization))
     {
-        this.story().storyCustomization = customization;
         lizard.effectColor = customization.bodyColor.SafeColorRange();
     }
 

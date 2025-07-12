@@ -113,7 +113,9 @@ public class MenagerieGameMode : StoryGameMode
         RainMeadow.RainMeadow.DebugMe();
         RainMeadow.RainMeadow.sSpawningAvatar = true;
         AbstractCreature abstractCreature;
-        var id = new EntityID(-1, 0);
+        var id = new EntityID(-1, critID);
+        // alt seed only works for non-negative numbers, due to "RandomSeed" - which is the primary way of getting the id number - only returning altSeed if it's above -1
+        // might as well have it anyways though
         id.altSeed = critID;
         abstractCreature = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(selectedCreature), null, location, id);
         if (selectedCreature == CreatureTemplate.Type.Slugcat)
@@ -235,7 +237,7 @@ public class MenagerieGameMode : StoryGameMode
     public override void Customize(Creature creature, OnlineCreature oc)
     {
         base.Customize(creature, oc);
-        if (creature.Template.type != CreatureTemplate.Type.Slugcat && oc.TryGetData<SlugcatCustomization>(out var data))
+        if (oc.TryGetData<SlugcatCustomization>(out var data))
         {
             DefaultAvatarBinds(creature, oc, data);
         }

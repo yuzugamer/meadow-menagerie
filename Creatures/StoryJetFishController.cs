@@ -12,6 +12,7 @@ using MoreSlugcats;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using UnityEngine.Rendering;
+using System.Security.AccessControl;
 
 namespace StoryMenagerie;
 
@@ -24,11 +25,11 @@ public class StoryJetFishController : CreatureController
     public int jumpTime;
     public bool lastGrab;
     public int biteCounter;
+    public bool prevPointing;
+    public Vector2? hoverPos;
     public StoryJetFishController(JetFish fish, OnlineCreature oc, int playerNumber, SlugcatCustomization customization) : base(fish, oc, playerNumber, new ExpandedAvatarData(customization))
     {
         this.fish = fish;
-        this.story().storyCustomization = customization;
-        this.customization = new ExpandedAvatarData(customization);
     }
 
     public override void Update(bool eu)
@@ -51,7 +52,9 @@ public class StoryJetFishController : CreatureController
 
     public override void ConsciousUpdate()
     {
+        prevPointing = pointing;
         base.ConsciousUpdate();
+        if (!pointing) hoverPos = null;
         if (fish.grasps[0] == null)
         {
             PhysicalObject candidate = this.PickupCandidate(0f, 30f);
@@ -241,10 +244,29 @@ public class StoryJetFishController : CreatureController
     {
         if (fish.graphicsModule is JetFishGraphics graphics)
         {
-            graphics.bodyParts[0].vel *= 0.6f; // airbreak
-            graphics.bodyParts[0].vel.y += 0.9f; // negate gravity;
-            graphics.bodyParts[0].vel += 5f * dir;
+            //graphics.bodyParts[0].vel *= 0.6f; // airbreak
+            //graphics.bodyParts[0].vel.y += 0.9f; // negate gravity;
+            //graphics.bodyParts[0].vel += 5f * dir;
         }
+        if (hoverPos == null)
+        {
+            if (fish.Submersion < 0.4f && (fish.bodyChunks[0].ContactPoint.y < 0 || fish.bodyChunks[1].ContactPoint.y < 0))
+            {
+                hoverPos = fish.bodyChunks[0].pos + new Vector2(0, 25f);
+            }
+            else
+            {
+                hoverPos = fish.bodyChunks[0].pos;
+            }
+        }
+        fish.mainBodyChunk.vel *= Custom.LerpMap(fish.mainBodyChunk.vel.magnitude, 1f, 6f, 0.999f, 0.9f);
+        fish.mainBodyChunk.vel += Vector2.ClampMagnitude(hoverPos.Value - fish.mainBodyChunk.pos, 100f) / 100f * 0.4f;
+        fish.bodyChunks[1].vel *= 0f;
+        //fish.bodyChunks[0].vel += 5f * dir;
+        fish.bodyChunks[1].vel -= 5f * dir;
+        fish.bodyChunks[0].pos.y += creature.gravity;
+        fish.bodyChunks[1].pos.y += creature.gravity;
+        fish.swimSpeed = 0f;
     }
 
     public override void LookImpl(Vector2 pos)

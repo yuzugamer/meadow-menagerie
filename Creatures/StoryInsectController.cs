@@ -17,8 +17,6 @@ public class StoryInsectController : CreatureController
     public StoryInsectController(BackgroundBugWrapper bug, OnlineCreature oc, int playerNumber, SlugcatCustomization customization) : base(bug, oc, playerNumber, new ExpandedAvatarData(customization))
     {
         this.wrapper = bug;
-        this.story().storyCustomization = customization;
-        this.customization = new ExpandedAvatarData(customization);
     }
 
     public override void Update(bool eu)

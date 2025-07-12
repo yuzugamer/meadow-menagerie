@@ -57,7 +57,7 @@ public static class CreatureControllerHooks
     public static void On_CreatureController_ctor(On_CreatureController_orig_ctor orig, CreatureController self, Creature creature, OnlineCreature oc, int playerNumber, MeadowAvatarData customization)
     {
         // just in case
-        if (OnlineManager.lobby == null || StoryMenagerie.IsMenagerie)
+        if ((OnlineManager.lobby == null || StoryMenagerie.IsMenagerie) && oc.TryGetData<SlugcatCustomization>(out var data))
         {
             // most of the code is yoinked, but what can 'ya do
             self.creature = creature;
@@ -71,6 +71,8 @@ public static class CreatureControllerHooks
             var story = self.story();
             self.mcd = oc.GetData<MeadowCreatureData>();
             story.stillInStartShelter = true;
+            self.story().storyCustomization = data;
+            self.customization = new ExpandedAvatarData(data);
             //if (self.customization == null) self.customization = new ExpandedAvatarData();
             //(self.customization as ExpandedAvatarData).owner = self;
             //story.state = new PlayerState(creature.abstractCreature, playerNumber, creature.room.game.StoryCharacter, false);
@@ -267,7 +269,7 @@ public static class CreatureControllerHooks
                     }
                     else if (self.creature.room.world.rainCycle.timer > self.creature.room.world.rainCycle.cycleLength)
                     {
-                        if (self.FoodInRoom(self.creature.room, false) >= ((story.saveState.malnourished) ? self.maxFood() : self.foodToHibernate()))
+                        if (self.FoodInRoom(self.creature.room, false) >= (story.saveState.malnourished ? self.maxFood() : self.foodToHibernate()))
                         {
                             clientData.readyForWin = true;
                             self.readyForWin = true;
@@ -289,6 +291,7 @@ public static class CreatureControllerHooks
                     else if (self.input[0].y < 0 && !self.input[0].jmp && !self.input[0].thrw && !self.input[0].pckp && self.creature.IsTileSolid(1, 0, -1) && !story.saveState.malnourished && self.FoodInRoom(self.creature.room, false) > 0 && self.FoodInRoom(self.creature.room, false) < self.foodToHibernate() && (self.input[0].x == 0 || ((!self.creature.IsTileSolid(1, -1, -1) || !self.creature.IsTileSolid(1, 1, -1)) && self.creature.IsTileSolid(1, self.input[0].x, 0))))
                     {
                         // foodmeter breaks if starved, and base meadow doesn't currently support starving anyway, so i can't be bothered
+                        // update: meadow's starting to support starvation. better get to it!!!
                         //scc.forceSleepCounter++;
                     }
                     else

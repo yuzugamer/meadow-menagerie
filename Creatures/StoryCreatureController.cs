@@ -29,8 +29,8 @@ public static class StoryCreatureController
     public static ConditionalWeakTable<CreatureController, StoryCreatureControllerValues> storyControllers = new ConditionalWeakTable<CreatureController, StoryCreatureControllerValues>();
     public static bool isStory(this CreatureController self, out StoryCreatureControllerValues story) => storyControllers.TryGetValue(self, out story);
     public static StoryCreatureControllerValues story(this CreatureController self) => storyControllers.GetOrCreateValue(self);
-    public static int foodToHibernate(this CreatureController self) => (self.creature.room.game.session is StoryGameSession session) ? SlugcatStats.SlugcatFoodMeter(session.saveState.saveStateNumber).x : 0;
-    public static int maxFood(this CreatureController self) => (self.creature.room.game.session is StoryGameSession session) ? SlugcatStats.SlugcatFoodMeter(session.saveState.saveStateNumber).y : 0;
+    public static int foodToHibernate(this CreatureController self) => (self.creature.room.game.session is StoryGameSession session) ? SlugcatStats.SlugcatFoodMeter(session.saveState.saveStateNumber).y : 0;
+    public static int maxFood(this CreatureController self) => (self.creature.room.game.session is StoryGameSession session) ? SlugcatStats.SlugcatFoodMeter(session.saveState.saveStateNumber).x : 0;
     //public static bool GrabImpl(this CreatureController self, PhysicalObject pickUpCandidate) => (self as IStoryCreatureController).GrabImpl(pickUpCandidate);
 
     /*public static void GrabUpdate(this CreatureController self)

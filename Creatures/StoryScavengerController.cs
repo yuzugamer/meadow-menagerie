@@ -28,7 +28,6 @@ public class StoryScavengerController : ScavengerController//, IStoryCreatureCon
     public int biteCounter;
     public StoryScavengerController(Scavenger scav, OnlineCreature oc, int playerNumber, SlugcatCustomization customization) : base(scav, oc, playerNumber, new ExpandedAvatarData(customization))
     {
-        this.story().storyCustomization = customization;
         secretMode = (OnlineManager.lobby.gameMode as MenagerieGameMode).secretMode;
         // fix: hook onto update, ai update, abstract ai update and temporarily change energy
         // maybe find a way to work around this changing graphics
@@ -207,7 +206,7 @@ public class StoryScavengerController : ScavengerController//, IStoryCreatureCon
             }
             scavenger.abstractCreature.controlled = false;
         }
-        if (!this.IsOnPole) scavenger.moveModeChangeCounter = -5;
+        if (scavenger.InStandardRunMode) scavenger.moveModeChangeCounter = -5;
     }
 
     public override void Moving(float magnitude)

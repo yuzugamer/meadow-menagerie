@@ -46,7 +46,7 @@ public static class CreatureHooks
     public static void On_Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stun)
     {
         // no hurt fren (slugpups are on the menu though)
-        if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode story && !story.friendlyFire && source.owner.abstractPhysicalObject is AbstractCreature asource && story.abstractAvatars.Contains(asource) && story.abstractAvatars.Contains(self.abstractCreature))
+        if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode story && !story.friendlyFire && source.owner.FriendlyFireSafetyCandidate() && self.FriendlyFireSafetyCandidate())
         {
             return;
         }
@@ -257,7 +257,8 @@ public static class CreatureHooks
 
     public static bool On_Creature_Grab(On.Creature.orig_Grab orig, Creature self, PhysicalObject obj, int graspUsed, int chunkGrabbed, Creature.Grasp.Shareability shareability, float dominance, bool overrideEquallyDominant, bool pacifying)
     {
-        if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode menagerie && obj.abstractPhysicalObject is AbstractCreature acrit && menagerie.abstractAvatars.Contains(acrit) && (acrit.realizedCreature == null || (!acrit.realizedCreature.dead && acrit.realizedCreature.stun == 0)) && menagerie.abstractAvatars.Contains(self.abstractCreature)) return false;
+        if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode menagerie && !menagerie.friendlyFire && obj.abstractPhysicalObject is AbstractCreature acrit && obj.FriendlyFireSafetyCandidate() && (acrit.realizedCreature == null || (!acrit.realizedCreature.dead && acrit.realizedCreature.stun == 0))) return false;
+        //if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode menagerie && obj.abstractPhysicalObject is AbstractCreature acrit && menagerie.abstractAvatars.Contains(acrit) && (acrit.realizedCreature == null || (!acrit.realizedCreature.dead && acrit.realizedCreature.stun == 0)) && menagerie.abstractAvatars.Contains(self.abstractCreature)) return false;
         return orig(self, obj, graspUsed, chunkGrabbed, shareability, dominance, overrideEquallyDominant, pacifying);
     }
 
@@ -294,7 +295,7 @@ public static class CreatureHooks
         orig(self, pos, room, spitOutAllSticks);
     }
 
-    public static bool IsMenagerie() => OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode;
+    public static bool IsMenagerie() => StoryMenagerie.IsMenagerie;
 
     public static void IL_ScavengerAI_LikeOfPlayer(ILContext il)
     {
@@ -350,7 +351,7 @@ public static class CreatureHooks
 
     public static void On_AbstractCreature_InDenUpdate(On.AbstractCreature.orig_InDenUpdate orig, AbstractCreature self, int time)
     {
-        if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode menagerie && self.remainInDenCounter > -1 && ((self.realizedCreature != null && CreatureController.creatureControllers.TryGetValue(self.realizedCreature, out var _) || (menagerie.abstractAvatars != null && menagerie.abstractAvatars.Contains(self)))))
+        if (StoryMenagerie.IsMenagerie && self.remainInDenCounter > -1 && ((self.realizedCreature != null && CreatureController.creatureControllers.TryGetValue(self.realizedCreature, out var _))))// || (menagerie.abstractAvatars != null && menagerie.abstractAvatars.Contains(self)))))
         {
             self.remainInDenCounter -= time;
             if (self.remainInDenCounter < 0)
@@ -364,7 +365,7 @@ public static class CreatureHooks
 
     public static bool On_AbstractCreature_WantToStayInDenUntilEndOfCycle(On.AbstractCreature.orig_WantToStayInDenUntilEndOfCycle orig, AbstractCreature self)
     {
-        if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode menagerie && ((self.realizedCreature != null && CreatureController.creatureControllers.TryGetValue(self.realizedCreature, out var _) || (menagerie.abstractAvatars != null && menagerie.abstractAvatars.Contains(self)))))
+        if (StoryMenagerie.IsMenagerie && ((self.realizedCreature != null && CreatureController.creatureControllers.TryGetValue(self.realizedCreature, out var _))))// || (menagerie.abstractAvatars != null && menagerie.abstractAvatars.Contains(self)))))
         {
             return false;
         }
@@ -384,7 +385,7 @@ public static class CreatureHooks
     public static void On_BigNeedleWorm_Swish(On.BigNeedleWorm.orig_Swish orig, BigNeedleWorm self)
     {
         orig(self);
-        if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode menagerie && CreatureController.creatureControllers.TryGetValue(self, out var crit))
+        if (StoryMenagerie.IsMenagerie && CreatureController.creatureControllers.TryGetValue(self, out var crit))
         {
             if (self.impaleChunk != null && self.impaleChunk.owner is Creature target && !target.dead)
             {

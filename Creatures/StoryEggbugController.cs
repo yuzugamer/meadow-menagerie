@@ -5,14 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StoryMenagerie
+namespace StoryMenagerie;
+
+public class StoryEggbugController : EggbugController
 {
-    public class StoryEggbugController : EggbugController
+    public StoryEggbugController(EggBug creature, OnlineCreature oc, int playerNumber, SlugcatCustomization customization) : base(creature, oc, playerNumber, new ExpandedAvatarData(customization))
     {
-        public StoryEggbugController(EggBug creature, OnlineCreature oc, int playerNumber, SlugcatCustomization customization) : base(creature, oc, playerNumber, new ExpandedAvatarData(customization))
-        {
-            this.story().storyCustomization = customization;
-            this.customization = new ExpandedAvatarData(customization);
-        }
     }
 }

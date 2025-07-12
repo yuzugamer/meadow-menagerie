@@ -26,6 +26,7 @@ public class MenagerieOnlineMenu : StoryOnlineMenu
     public MenuLabel? skinLabel;
     public int skinIndex;
     public int secretinput;
+    public bool allowMajorCreatures;
 
     public CreatureTemplate.Type CurrentCreature
     {

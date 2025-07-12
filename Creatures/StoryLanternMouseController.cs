@@ -22,7 +22,6 @@ public class StoryLanternMouseController : LanternMouseController
     public bool silly;
     public StoryLanternMouseController(LanternMouse mouse, OnlineCreature oc, int playerNumber, SlugcatCustomization customization) : base(mouse, oc, playerNumber, new ExpandedAvatarData(customization))
     {
-        this.story().storyCustomization = customization;
     }
 
     public static bool IsEdible(AbstractPhysicalObject obj)

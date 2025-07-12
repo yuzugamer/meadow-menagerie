@@ -52,8 +52,8 @@ public static class StoryHooks
         On.SLOracleBehavior.Update += On_SLOracleBehavior_Update;
         On.VoidSea.VoidSeaScene.Update += On_VoidSeaScene_Update;
         IL.VoidSea.VoidWorm.Update += IL_VoidWorm_Update;
-        IL.VoidSea.VoidWorm.BackgroundWormBehavior.Update += ReplaceVoidWormBehaviorPlayerHook;
-        IL.VoidSea.VoidWorm.MainWormBehavior.Update += IL_MainWormBehavior_Update;
+        //IL.VoidSea.VoidWorm.BackgroundWormBehavior.Update += ReplaceVoidWormBehaviorPlayerHook;
+        //IL.VoidSea.VoidWorm.MainWormBehavior.Update += IL_MainWormBehavior_Update;
     }
 
     private static float BasePosScore(On.SSOracleBehavior.orig_BasePosScore orig, SSOracleBehavior self, Vector2 tryPos)
@@ -1917,10 +1917,17 @@ public static class StoryHooks
                 bodyChunk4.vel.y = bodyChunk4.vel.y + crit.gravity;
             }
         }
-        if (slug != null && (!ModManager.MSC || self.saintEndPhase != VoidSeaScene.SaintEndingPhase.EchoTransform))
+        if ((!ModManager.MSC || self.saintEndPhase != VoidSeaScene.SaintEndingPhase.EchoTransform))
         {
-            slug.airInLungs = 1f;
-            slug.lungsExhausted = false;
+            if (slug != null)
+            {
+                slug.airInLungs = 1f;
+                slug.lungsExhausted = false;
+            }
+            else if (crit is AirBreatherCreature breather)
+            {
+                breather.lungs = 1f;
+            }
         }
         if (crit.graphicsModule is PlayerGraphics && (crit.graphicsModule as PlayerGraphics).lightSource != null)
         {
@@ -1935,19 +1942,31 @@ public static class StoryHooks
                 (crit.graphicsModule as PlayerGraphics).lightSource.setRad = new float?(Custom.LerpMap(crit.mainBodyChunk.pos.y, -2000f, -8000f, 300f, 200f) * (0.5f + 0.5f * (1f - self.eggProximity)));
             }
         }
+        else if (CreatureController.creatureControllers.TryGetValue(crit, out var cc) && cc != null)
+        {
+            if (self.Inverted)
+            {
+                cc.lightSource.setAlpha = new float?(Custom.LerpMap(crit.mainBodyChunk.pos.y, 2000f, 8000f, 1f, 0.2f) * (1f - self.eggProximity));
+                cc.lightSource.setRad = new float?(Custom.LerpMap(crit.mainBodyChunk.pos.y, 2000f, 8000f, 300f, 200f) * (0.5f + 0.5f * (1f - self.eggProximity)));
+            }
+            else
+            {
+                cc.lightSource.setAlpha = new float?(Custom.LerpMap(crit.mainBodyChunk.pos.y, -2000f, -8000f, 1f, 0.2f) * (1f - self.eggProximity));
+                cc.lightSource.setRad = new float?(Custom.LerpMap(crit.mainBodyChunk.pos.y, -2000f, -8000f, 300f, 200f) * (0.5f + 0.5f * (1f - self.eggProximity)));
+            }
+        }
         if (self.deepDivePhase == VoidSeaScene.DeepDivePhase.EggScenario && UnityEngine.Random.value < 0.1f)
         {
             crit.mainBodyChunk.vel += Custom.DirVec(crit.mainBodyChunk.pos, self.theEgg.pos) * 0.02f * UnityEngine.Random.value;
         }
         if (ModManager.MMF && crit.Submersion > 0.5f)
         {
-            if (crit.grasps[0] != null && !(crit.grasps[0].grabbed is Creature))
+            for (int i = 0; i < crit.grasps.Length; i++)
             {
-                self.AddMeltObject(crit.grasps[0].grabbed);
-            }
-            if (crit.grasps[1] != null && !(crit.grasps[1].grabbed is Creature))
-            {
-                self.AddMeltObject(crit.grasps[1].grabbed);
+                if (crit.grasps[i] != null && !(crit.grasps[i].grabbed is Creature))
+                {
+                    self.AddMeltObject(crit.grasps[1].grabbed);
+                }
             }
             if (slug != null && slug.spearOnBack != null && slug.spearOnBack.HasASpear)
             {
@@ -1974,7 +1993,7 @@ public static class StoryHooks
 
     public static Creature VoidWormPlayer(VoidWorm self, Creature orig)
     {
-        if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode && self != null)
+        if (StoryMenagerie.IsMenagerie)// && self != null)
         {
             if (voidWormCrits.TryGetValue(self, out var crit))
             {
@@ -2067,7 +2086,7 @@ public static class StoryHooks
         }
     }
 
-    public static bool MenagerieLobby() => OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode;
+    public static bool MenagerieLobby() => StoryMenagerie.IsMenagerie;
 
     public static SlugcatStats.Name GameCharacter(VoidWorm.MainWormBehavior self) => self.worm.room.game.StoryCharacter;
 

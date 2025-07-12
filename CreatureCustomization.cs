@@ -13,6 +13,8 @@ public class CreatureCustomization : SlugcatCustomization
 {
     public CreatureTemplate.Type selectedCreature;
     public bool[] enabledColors;
+    public bool special;
+    public int id;
     public override EntityDataState MakeState(OnlineEntity onlineEntity, OnlineResource inResource)
     {
         return new State(this);
@@ -23,12 +25,16 @@ public class CreatureCustomization : SlugcatCustomization
     {
         [OnlineField]
         public CreatureTemplate.Type selectedCreature;
+        [OnlineField]
         public bool[] enabledColors;
-
+        [OnlineField]
+        public bool special;
         public State() { }
         public State(CreatureCustomization customization) : base()
         {
             selectedCreature = customization.selectedCreature;
+            enabledColors = customization.enabledColors;
+            special = customization.special;
         }
 
         public override void ReadTo(OnlineEntity.EntityData entityData, OnlineEntity onlineEntity)
@@ -36,6 +42,8 @@ public class CreatureCustomization : SlugcatCustomization
             base.ReadTo(entityData, onlineEntity);
             var customization = (CreatureCustomization)entityData;
             customization.selectedCreature = selectedCreature;
+            customization.enabledColors = enabledColors;
+            customization.special = special;
         }
     }
 }

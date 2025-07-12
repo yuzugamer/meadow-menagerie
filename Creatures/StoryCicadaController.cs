@@ -16,7 +16,6 @@ public class StoryCicadaController : CicadaController
     public int grabHeld;
     public StoryCicadaController(Cicada creature, OnlineCreature oc, int playerNumber, SlugcatCustomization customization) : base(creature, oc, playerNumber, new ExpandedAvatarData(customization))
     {
-        this.story().storyCustomization = customization;
     }
 
     public override void ConsciousUpdate()
