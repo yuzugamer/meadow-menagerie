@@ -175,13 +175,13 @@ public class MenagerieOnlineMenu : StoryOnlineMenu
             RemoveSubCreatureList();
             PlayerSelectedCreature = menagerieGameMode.requiredHostCreature;
         }
-        if (currentCreature != CreatureTemplate.Type.Slugcat || hideSelection || menagerieGameMode.secretMode)
+        if (currentCreature == CreatureTemplate.Type.Slugcat && !hideSelection && !menagerieGameMode.secretMode)
         {
-            RemoveSlugcatList();
+            SetupSlugcatList();
         }
         else
         {
-            pages[0].ClearMenuObject(ref slugcatLabel);
+            RemoveSlugcatList();
         }
         if (selectedCreatureGroup != null && creatureGroups[selectedCreatureGroup] != null)
         {
