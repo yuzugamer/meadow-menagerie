@@ -297,18 +297,6 @@ namespace StoryMenagerie.Creatures
                 if (grabbed is IPlayerEdible edible && edible.Edible)
                 {
                     BiteStruggle();
-                    if (edible.BitesLeft == 1)
-                    {
-                        //this.AddFood(edible.FoodPoints, 1f);
-                    }
-                    if (grabbed is Creature creature)
-                    {
-                        creature.SetKillTag(scavenger.abstractCreature);
-                    }
-                    if (scavenger.graphicsModule != null)
-                    {
-                        //(mouse.graphicsModule as PlayerGraphics).BiteFly(i);
-                    }
                     this.FoodBitByPlayer(grabbed, 0, eu);
                     return;
                 }

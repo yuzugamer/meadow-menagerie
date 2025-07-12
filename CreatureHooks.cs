@@ -12,6 +12,7 @@ namespace StoryMenagerie;
 
 public static class CreatureHooks
 {
+    public static int shelterCleanupCounter = 0;
     public static void Apply()
     {
         On.Creature.Violence += On_Creature_Violence;
@@ -51,7 +52,12 @@ public static class CreatureHooks
         On.ShelterDoor.Update += (On.ShelterDoor.orig_Update orig, ShelterDoor self, bool eu) =>
         {
             orig(self, eu);
-            self.killHostiles = true;
+            ++shelterCleanupCounter;
+            if (shelterCleanupCounter >= 40 * 5) //every 5 seconds
+            {
+                self.killHostiles = true;
+                shelterCleanupCounter = 0;
+            }
         };
     }
 
@@ -343,8 +349,6 @@ public static class CreatureHooks
         }
     }
 
-    public static float MassDiscrepancyLeniency(float orig, Lizard self) => OnlineManager.lobby != null && CreatureController.creatureControllers.TryGetValue(self, out var _) ? orig * 2.25f : orig;
-
     public static void IL_Lizard_Bite(ILContext il)
     {
         try
@@ -357,7 +361,7 @@ public static class CreatureHooks
             );
             c.MoveAfterLabels();
             c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate(MassDiscrepancyLeniency);
+            c.EmitDelegate((float orig, Lizard self) => OnlineManager.lobby != null && CreatureController.creatureControllers.TryGetValue(self, out var _) ? orig * 10.25f : orig);
         }
         catch (Exception ex)
         {
