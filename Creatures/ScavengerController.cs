@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using RWCustom;
 using static RewiredConsts.Layout;
-using JetBrains.Annotations;
 
 namespace StoryMenagerie.Creatures
 {
@@ -33,9 +32,6 @@ namespace StoryMenagerie.Creatures
             // fix: hook onto update, ai update, abstract ai update and temporarily change energy
             // maybe find a way to work around this changing graphics
             //scavenger.abstractCreature.personality.energy = 1f;
-            scavenger.animation = null;
-            scavenger.movMode = Scavenger.MovementMode.Run;
-            scavenger.moveModeChangeCounter = -5;
         }
 
         public bool LookForItems()
@@ -180,10 +176,10 @@ namespace StoryMenagerie.Creatures
             else
             {
                 lastThrow = false;
-                if (throwHeld < 9)
+                if (throwHeld > 0 && throwHeld < 9)
                 {
                     Vector2 aimPosition = this.scavenger.mainBodyChunk.pos + new Vector2(this.scavenger.flip * 250f, (this.scavenger.flip * 125f) * input[0].y);
-                    if (scavenger.animation.id != Scavenger.ScavengerAnimation.ID.ThrowCharge)
+                    if (scavenger.animation == null || scavenger.animation.id != Scavenger.ScavengerAnimation.ID.ThrowCharge)
                     {
                         scavenger.animation = new Scavenger.ThrowChargeAnimation(scavenger, null);
                         scavenger.animation.age = 40;
@@ -193,13 +189,13 @@ namespace StoryMenagerie.Creatures
                 }
             }
 
-            if (input[1].y > 0 && input[0].y < 0)
+            if (input[0].y < 0 && input[1].y >= 0)
             {
                 scavenger.movMode = Scavenger.MovementMode.Crawl;
             }
-            else if (input[1].y < 0 && input[0].y > 0)
+            else if (input[0].y > 0 && input[1].y <= 0)
             {
-                scavenger.movMode = Scavenger.MovementMode.Run;
+                scavenger.movMode = Scavenger.MovementMode.StandStill;
             }
 
             if (input[0].spec)
