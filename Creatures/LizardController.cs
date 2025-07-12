@@ -188,16 +188,13 @@ namespace StoryMenagerie.Creatures
 
         public override void ConsciousUpdate()
         {
-            lockInPlace = input[0].thrw && (lizard.tongue != null || lizard.AI.redSpitAI != null);
             base.ConsciousUpdate();
+
+            lockInPlace = input[0].thrw && (lizard.tongue != null || lizard.AI.redSpitAI != null);
             if (input[0].pckp)
             {
                 if (lizard.grasps[0] == null)
-                {
-                    // who even knows
-                    //lizard.jawOpen = Mathf.Clamp(lizard.jawOpen + Mathf.Lerp((1f / (lizard.jawOpen > 0.75f ? (lizard.lizardParams.biteDelay + 2) : ((lizard.lizardParams.biteDelay + 1) / 2))), (1f - lizard.jawOpen) * 0.04f, Mathf.Pow(lizard.jawOpen, 1.6f)), 0f, 1f);
                     lizard.jawOpen = Mathf.Clamp(lizard.jawOpen + Mathf.Lerp((1f / (lizard.jawOpen > 0.75f ? (lizard.lizardParams.biteDelay + 3) : ((lizard.lizardParams.biteDelay + 2) / 2))), (1f - lizard.jawOpen) * 0.075f, (lizard.jawOpen / 1.35f)), 0f, 1f);
-                }
                 grabHeld++;
             }
             else
@@ -209,7 +206,7 @@ namespace StoryMenagerie.Creatures
                     var pos = lizard.mainBodyChunk.pos;
                     if (lizard.grasps[0] == null)
                     {
-                        if ((lizard.jawOpen > 0.25f || grabHeld >= (lizard.lizardParams.biteDelay / 10)))
+                        if ((lizard.jawOpen > 0.25f || grabHeld >= lizard.lizardParams.biteDelay / 10f))
                         {
                             lizard.jawOpen = 1f;
                             TryBite();
@@ -217,11 +214,10 @@ namespace StoryMenagerie.Creatures
                         }
                         lizard.jawOpen = 0f;
                     }
-                    else if (grabHeld > 40)
+                    else if (grabHeld > 30)
                     {
                         lizard.ReleaseGrasp(0);
                         lizard.jawOpen += 0.2f;
-                        grabHeld = 0;
                     }
                 }
                 grabHeld = 0;
@@ -478,8 +474,7 @@ namespace StoryMenagerie.Creatures
                     && creature.bodyChunks[i].vel.y < 4f
                     && GetTile(i, input[0].x, 0).Solid
                     && !GetTile(i, 0, 1).Solid
-                    && !GetTile(i, input[0].x, 1).Solid
-                    )
+                    && !GetTile(i, input[0].x, 1).Solid)
                     {
                         creature.bodyChunks[0].vel += new Vector2(0f, 2f);
                     }

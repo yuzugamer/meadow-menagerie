@@ -343,8 +343,6 @@ public static class CreatureHooks
         }
     }
 
-    public static float MassDiscrepancyLeniency(float orig, Lizard self) => OnlineManager.lobby != null && CreatureController.creatureControllers.TryGetValue(self, out var _) ? orig * 2.25f : orig;
-
     public static void IL_Lizard_Bite(ILContext il)
     {
         try
@@ -357,7 +355,7 @@ public static class CreatureHooks
             );
             c.MoveAfterLabels();
             c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate(MassDiscrepancyLeniency);
+            c.EmitDelegate((float orig, Lizard self) => OnlineManager.lobby != null && CreatureController.creatureControllers.TryGetValue(self, out var _) ? orig * 10.25f : orig);
         }
         catch (Exception ex)
         {

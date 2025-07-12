@@ -213,10 +213,6 @@ namespace StoryMenagerie.Creatures
             if ((grabbed is IPlayerEdible edible && edible.Edible && eel.abstractCreature.CanEat(grabbed)) || (grabbed is Creature crit && eel.AI.DynamicRelationship((crit).abstractCreature).type == CreatureTemplate.Relationship.Type.Eats))
             {
                 eel.mainBodyChunk.vel += Vector2.Lerp(Custom.RNV(), new Vector2(0f, 1f), 0.4f) * Mathf.Lerp(1f, 5f, UnityEngine.Random.value);
-                if (grabbed is Creature)
-                {
-                    (grabbed as Creature).SetKillTag(eel.abstractCreature);
-                }
                 this.FoodBitByPlayer(grabbed, 0, eu);
                 return;
             }

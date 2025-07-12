@@ -259,8 +259,6 @@ namespace StoryMenagerie.Creatures
                     graphics.headDrawDirection = Custom.DirVec(headPos, yeek.grasps[0].grabbedChunk.pos);
                     graphics.blinkStartCounter = 0;
                 }
-                if (grabbed is Creature grabbedCreature)
-                    grabbedCreature.SetKillTag(yeek.abstractCreature);
                 this.FoodBitByPlayer(grabbed, 0, eu);
             }
         }
