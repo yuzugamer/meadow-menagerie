@@ -185,6 +185,11 @@ namespace StoryMenagerie.Creatures
                         scavenger.animation.age = 40;
                         (scavenger.animation as Scavenger.ThrowChargeAnimation).aimTarget = aimPosition;
                     }
+                    else
+                    {
+                        scavenger.animation.age = 40;
+                        (scavenger.animation as Scavenger.ThrowChargeAnimation).aimTarget = aimPosition;
+                    }
                     this.scavenger.TryThrow(null, ScavengerAI.ViolenceType.Lethal, aimPosition);
                 }
             }
