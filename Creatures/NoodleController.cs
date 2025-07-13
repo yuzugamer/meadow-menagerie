@@ -59,16 +59,19 @@ namespace StoryMenagerie.Creatures
                     // juggling types like this to find IDs is slightly less simple but finds non-slugcat players just fine (at least according to my quick 2 minute test)
                     // maybe there's a more elegant way to do this?
                     bool isPlayer = false;
-                    foreach (var playerAvatar in OnlineManager.lobby.playerAvatars)
+                    if (OnlineManager.lobby.gameMode is not StoryGameMode story || !story.friendlyFire)
                     {
-                        var onlineEntity = playerAvatar.Value.FindEntity(true);
-                        if (onlineEntity is OnlinePhysicalObject onlinePhysicalPlayer)
+                        foreach (var playerAvatar in OnlineManager.lobby.playerAvatars)
                         {
-                            var abstractPhysicalPlayer = onlinePhysicalPlayer.apo;
-                            if (abstractPhysicalPlayer.ID == critter.ID)
+                            var onlineEntity = playerAvatar.Value.FindEntity(true);
+                            if (onlineEntity is OnlinePhysicalObject onlinePhysicalPlayer)
                             {
-                                isPlayer = true;
-                                break;
+                                var abstractPhysicalPlayer = onlinePhysicalPlayer.apo;
+                                if (abstractPhysicalPlayer.ID == critter.ID)
+                                {
+                                    isPlayer = true;
+                                    break;
+                                }
                             }
                         }
                     }
