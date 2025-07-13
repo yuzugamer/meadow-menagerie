@@ -54,6 +54,7 @@ public static class CreatureControllerHooks
         new Hook(typeof(ScavengerController).GetMethod(nameof(ScavengerController.ScavengerGraphics_ctor), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public), On_ScavengerController_ScavengerGraphics_ctor);
         //var scavengerController = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(t => t.IsClass && t.Namespace == nameof(RainMeadow)).First(t => t.Name == "ScavengerController");
         //new Hook(scavengerController.GetMethod("ConsciousUpdate", BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic), On_ScavengerController_ConsciousUpdate);
+        new Hook(typeof(CreatureController).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance), On_CreatureController_Call);
     }
 
     public delegate void On_LizardController_orig_LizardGraphics_ctor(On.LizardGraphics.orig_ctor orig, LizardGraphics self, PhysicalObject ow);
@@ -615,5 +616,10 @@ public static class CreatureControllerHooks
             return;
         }
         orig(origorig, self, ow);
+    }
+
+    public static void On_CreatureController_Call(Action<CreatureController> orig, CreatureController self)
+    {
+        if (!StoryMenagerie.IsMenagerie) orig(self);
     }
 }

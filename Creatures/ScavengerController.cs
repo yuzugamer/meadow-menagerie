@@ -192,6 +192,7 @@ namespace StoryMenagerie.Creatures
                     }
                     this.scavenger.TryThrow(null, ScavengerAI.ViolenceType.Lethal, aimPosition);
                 }
+                throwHeld = 0;
             }
 
             if (input[0].y < 0 && input[1].y >= 0)
