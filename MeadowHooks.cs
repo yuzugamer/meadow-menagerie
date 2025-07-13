@@ -34,9 +34,10 @@ public static class MeadowHooks
             new ILHook(typeof(OnlinePlayerDisplay).GetConstructor(new Type[] { typeof(PlayerSpecificOnlineHud), typeof(SlugcatCustomization), typeof(OnlinePlayer) }), IL_OnlinePlayerDisplay_ctor);
             new ILHook(typeof(MeadowCreatureData.State).GetConstructor(new Type[] { typeof(MeadowCreatureData) }), IL_MeadowCreatureData_State_ctor);
             new ILHook(typeof(MeadowCreatureData.State).GetMethod("ReadTo", BindingFlags.Instance | BindingFlags.Public), IL_MeadowCreatureData_State_ReadTo);
-            new ILHook(typeof(OnlinePlayerDeathBump).GetConstructor(new Type[] { typeof(PlayerSpecificOnlineHud), typeof(SlugcatCustomization) }), IL_OnlinePlayerDeathBump);
+            new ILHook(typeof(OnlinePlayerDeathBump).GetConstructor(new Type[] { typeof(PlayerSpecificOnlineHud), typeof(SlugcatCustomization) }), IL_OnlinePlayerDeathBump_ctor);
             new Hook(typeof(StoryModeExtensions).GetMethod(nameof(StoryModeExtensions.FriendlyFireSafetyCandidate), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic), On_StoryModeExtensions_FriendlyFireSafetyCandidate);
             new Hook(typeof(AbstractPhysicalObjectState).GetMethod(nameof(AbstractPhysicalObjectState.GetRealizedState), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public), On_AbstractCreatureState_GetRealizedState);
+            new ILHook(typeof(OnlinePlayerDeathBump).GetMethod("Draw", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic), IL_OnlinePlayerDeathBump_Draw);
         }
         catch (Exception ex)
         {
@@ -190,7 +191,11 @@ public static class MeadowHooks
     {
         if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode menagerie && RainMeadow.RainMeadow.sUpdateFood)
         {
-            if (!OnlinePhysicalObject.map.TryGetValue(self.abstractPhysicalObject, out var onlineEntity)) throw new InvalidProgrammerException("Player doesn't have OnlineEntity counterpart!!");
+            if (!OnlinePhysicalObject.map.TryGetValue(self.abstractPhysicalObject, out var onlineEntity))
+            {
+                StoryMenagerie.LogError("Player doesn't have OnlineEntity counterpart!!");
+                return;
+            }
             if (!onlineEntity.isMine) return;
             var state = (PlayerState)self.State;
             state.foodInStomach = menagerie.foodPoints;
@@ -472,7 +477,7 @@ public static class MeadowHooks
     }
 
 
-    public static void IL_OnlinePlayerDeathBump(ILContext il)
+    public static void IL_OnlinePlayerDeathBump_ctor(ILContext il)
     {
         try
         {
@@ -527,5 +532,34 @@ public static class MeadowHooks
             return new RealizedEggBugState((OnlineCreature)onlineObject);
         }
         return orig(self, onlineObject);
+    }
+
+    public static bool OwnerIsPlayer(OnlinePlayerDeathBump self) => self.owner.abstractPlayer is Player;
+
+    public static void IL_OnlinePlayerDeathBump_Draw(ILContext il)
+    {
+        try
+        {
+            var c = new ILCursor(il);
+            var skip = c.DefineLabel();
+            c.GotoNext(
+                x => x.MatchLdarg(0),
+                x => x.MatchLdfld<OnlinePlayerDeathBump>(nameof(OnlinePlayerDeathBump.owner)),
+                x => x.MatchLdfld<PlayerSpecificOnlineHud>(nameof(PlayerSpecificOnlineHud.abstractPlayer)),
+                x => x.MatchLdfld<AbstractCreature>(nameof(AbstractCreature.state)),
+                x => x.MatchIsinst<PlayerState>(),
+                x => x.MatchLdfld<PlayerState>(nameof(PlayerState.slugcatCharacter)),
+                x => x.MatchLdsfld(out var _), // survivor
+                x => x.MatchCallOrCallvirt(out var _), // op equality
+                x => x.MatchBrfalse(out skip)
+                );
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate(OwnerIsPlayer);
+            c.Emit(OpCodes.Brfalse, skip);
+        }
+        catch (Exception ex)
+        {
+
+        }
     }
 }
