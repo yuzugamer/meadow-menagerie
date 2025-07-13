@@ -15,6 +15,20 @@ namespace StoryMenagerie.Creatures
             On.DropBug.Update += DropBug_Update;
             On.DropBug.Act += DropBug_Act;
             On.DropBugAI.Update += DropBugAI_Update;
+            On.DropBugGraphics.ApplyPalette += (On.DropBugGraphics.orig_ApplyPalette orig, DropBugGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette) =>
+            {
+                if (RainMeadow.CreatureController.creatureControllers.TryGetValue(self.bug, out var cc) && cc.isStory(out var scc))
+                {
+                    self.blackColor = palette.blackColor;
+                    self.shineColor = Color.Lerp(scc.storyCustomization.bodyColor, palette.fogColor, 0.25f + 0.75f * Mathf.InverseLerp(0.5f, 1f, self.darkness));
+                    self.camoColor = Color.Lerp(palette.blackColor, Color.Lerp(palette.texture.GetPixel(4, 3), palette.fogColor, palette.fogAmount * 0.13333334f), 0.5f);
+                    self.RefreshColor(0f, sLeaser);
+                }
+                else
+                {
+                    orig(self, sLeaser, rCam, palette);
+                }
+            };
         }
 
         public override WorldCoordinate CurrentPathfindingPosition

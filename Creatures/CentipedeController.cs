@@ -100,7 +100,7 @@ namespace StoryMenagerie.Creatures
         {
             if (CreatureController.creatureControllers.TryGetValue(self.centipede, out var cc) && cc.isStory(out var scc))
             {
-                return scc.storyCustomization.bodyColor;
+                return Color.Lerp(scc.storyCustomization.bodyColor, self.blackColor, self.darkness);
             }
             return orig(self);
         }
@@ -109,7 +109,7 @@ namespace StoryMenagerie.Creatures
         {
             if (CreatureController.creatureControllers.TryGetValue(self.centipede, out var cc) && cc.isStory(out var scc))
             {
-                return Color.Lerp(scc.storyCustomization.bodyColor, self.blackColor, 0.3f);
+                return Color.Lerp(scc.storyCustomization.bodyColor, self.blackColor, 0.3f + 0.7f * self.darkness);
             }
             return orig(self);
         }
