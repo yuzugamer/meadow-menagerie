@@ -83,6 +83,7 @@ namespace StoryMenagerie.Creatures
 
             if (yeek.climbingMode)
             {
+                yeek.interestInClimbingPoles = 1f;
                 if (input[0].y < 0 && input[1].y >= 0)
                 {
                     if (downTimer > 0)
@@ -128,7 +129,7 @@ namespace StoryMenagerie.Creatures
             {
                 if (yeek.climbingMode)
                 {
-                    if (input[0].x < 0)
+                    if (input[0].x != 0)
                     {
                         yeek.EndClimb();
                     }
@@ -139,7 +140,7 @@ namespace StoryMenagerie.Creatures
                     if (!lastJump || (stuckTracker.Utility() >= 0.75f || yeek.firstChunk.contactPoint.y < 0 || (connection.type == MovementConnection.MovementType.Standard || connection.type == MovementConnection.MovementType.Slope || connection.type == MovementConnection.MovementType.CeilingSlope || connection.type == MovementConnection.MovementType.OpenDiagonal || connection.type == MovementConnection.MovementType.SemiDiagonalReach || connection.type == MovementConnection.MovementType.ReachUp || (connection.type == MovementConnection.MovementType.ShortCut && yeek.shortcutDelay > 0))))
                     {
                         yeek.timeSinceHop = 0;
-                        var dir = yeek.firstChunk.pos + (input[0].AnyDirectionalInput ? new Vector2(input[0].x, input[0].y) * 5f : Vector2.up);
+                        var dir = yeek.firstChunk.pos + (input[0].AnyDirectionalInput ? new Vector2(input[0].x, input[0].y) * 3.5f : Vector2.up);
                         yeek.Hop(yeek.firstChunk.pos, dir, true, true, true);
                     }
                 }
@@ -195,7 +196,6 @@ namespace StoryMenagerie.Creatures
             if (!yeek.OnGround)
             {
                 RainMeadow.RainMeadow.Debug("gripped");
-
                 for (int i = 0; i < creature.bodyChunks.Length; i++)
                 {
                     creature.bodyChunks[i].vel *= 0.25f;
@@ -285,12 +285,10 @@ namespace StoryMenagerie.Creatures
 
         public static void On_Yeek_Act(On.MoreSlugcats.Yeek.orig_Act orig, Yeek self)
         {
-            if (CreatureController.creatureControllers.TryGetValue(self, out var cc))
+            if (CreatureController.creatureControllers.TryGetValue(self, out var p))
             {
-                cc.ConsciousUpdate();
-                //self.abstractCreature.controlled = true;
+                p.ConsciousUpdate();
                 orig(self);
-                //self.abstractCreature.controlled = false;
             }
             else
             {
