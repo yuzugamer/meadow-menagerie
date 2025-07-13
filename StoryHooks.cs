@@ -1991,7 +1991,7 @@ public static class StoryHooks
         voidWormCrits.Add(self, crit);
     }
 
-    public static Creature VoidWormPlayer(VoidWorm self, Creature orig)
+    public static Creature VoidWormPlayer(VoidWorm self, Creature value)
     {
         if (StoryMenagerie.IsMenagerie)// && self != null)
         {
@@ -2012,7 +2012,7 @@ public static class StoryHooks
                 }
             }
         }
-        return orig;
+        return value;
     }
 
     public static bool ReplaceVoidWormPlayer(ILCursor c, int ldloc)
