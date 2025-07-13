@@ -12,7 +12,7 @@ namespace StoryMenagerie.Creatures
     {
         public static void ApplyHooks()
         {
-            new Hook(typeof(EggbugController).GetMethod(nameof(EggbugController.EggBugGraphics_ApplyPalette), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public), On_EggBugController_EggBugGraphics_ApplyPalette);
+            new Hook(typeof(RainMeadow.EggbugController).GetMethod(nameof(RainMeadow.EggbugController.EggBugGraphics_ApplyPalette), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public), On_EggBugController_EggBugGraphics_ApplyPalette);
         }
 
         public EggbugController(EggBug creature, OnlineCreature oc, int playerNumber, CreatureCustomization customization) : base(creature, oc, playerNumber, new ExpandedAvatarData(customization))

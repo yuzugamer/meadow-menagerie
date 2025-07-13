@@ -293,6 +293,10 @@ public class MenagerieGameMode : StoryGameMode
             {
                 new Creatures.DropBugController(dropbug, oc, 0, new CreatureCustomization(data));
             }
+            else if (creature is PoleMimic polemimic)
+            {
+                new Creatures.PoleMimicController(polemimic, oc, 0, new CreatureCustomization(data));
+            }
             else if (creature is Watcher.Barnacle barnacle)
             {
                 new Creatures.BarnacleController(barnacle, oc, 0, new CreatureCustomization(data));

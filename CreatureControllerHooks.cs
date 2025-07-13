@@ -39,6 +39,22 @@ public static class CreatureControllerHooks
         Creatures.BarnacleController.ApplyHooks();
         Creatures.DropBugController.ApplyHooks();
 
+        On.Creature.SafariControlInputUpdate += (On.Creature.orig_SafariControlInputUpdate orig, Creature self, int index) =>
+        {
+            // Non local? Don't own!
+            if (OnlineManager.lobby != null && !self.IsLocal())
+            {
+                self.inputWithoutDiagonals = null;
+                self.lastInputWithoutDiagonals = null;
+                self.inputWithDiagonals = null;
+                self.lastInputWithDiagonals = null;
+            }
+            else
+            {
+                orig(self, index);
+            }
+        };
+
         //GetSpecialInput = typeof(CreatureController).GetMethod("GetSpecialInput", BindingFlags.NonPublic | BindingFlags.Instance);
         //CreatureControllerMoving = typeof(CreatureController).GetMethod("Moving", BindingFlags.NonPublic | BindingFlags.Instance);
         //CreatureControllerLookImpl = typeof(CreatureController).GetMethod("LookImpl", BindingFlags.NonPublic | BindingFlags.Instance);

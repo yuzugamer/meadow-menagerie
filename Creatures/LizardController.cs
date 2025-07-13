@@ -22,8 +22,8 @@ namespace StoryMenagerie.Creatures
 
         public static void ApplyHooks()
         {
-            new ILHook(typeof(LizardController).GetConstructor(new Type[] { typeof(Lizard), typeof(OnlineCreature), typeof(int), typeof(MeadowAvatarData) }), IL_LizardController_ctor);
-            new ILHook(typeof(LizardController).GetMethod("ConsciousUpdate", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic), IL_LizardController_ConsciousUpdate);
+            new ILHook(typeof(RainMeadow.LizardController).GetConstructor(new Type[] { typeof(Lizard), typeof(OnlineCreature), typeof(int), typeof(MeadowAvatarData) }), IL_LizardController_ctor);
+            new ILHook(typeof(RainMeadow.LizardController).GetMethod("ConsciousUpdate", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic), IL_LizardController_ConsciousUpdate);
         }
 
         public LizardController(Lizard lizard, OnlineCreature oc, int playerNumber, CreatureCustomization customization) : base(lizard, oc, playerNumber, new ExpandedAvatarData(customization))

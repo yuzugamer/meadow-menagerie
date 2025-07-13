@@ -1,4 +1,5 @@
 using MonoMod.Cil;
+using RainMeadow;
 using RWCustom;
 using System;
 using UnityEngine;
@@ -12,8 +13,36 @@ namespace StoryMenagerie.Creatures
 
         internal static void ApplyHooks()
         {
-            On.DropBug.Update += DropBug_Update;
-            On.DropBug.Act += DropBug_Act;
+            On.DropBug.Update += (On.DropBug.orig_Update orig, DropBug self, bool eu) =>
+            {
+                if (creatureControllers.TryGetValue(self, out var p))
+                {
+                    p.Update(eu);
+                    var old = self.AI.bug.abstractCreature.controlled;
+                    self.AI.bug.abstractCreature.controlled = true;//глючное
+                    orig(self, eu);
+                    self.AI.bug.abstractCreature.controlled = old;
+                }
+                else
+                {
+                    orig(self, eu);
+                }
+            };
+            On.DropBug.Act += (On.DropBug.orig_Act orig, DropBug self) =>
+            {
+                if (creatureControllers.TryGetValue(self, out var p))
+                {
+                    p.ConsciousUpdate();
+                    var old = self.AI.bug.abstractCreature.controlled;
+                    self.AI.bug.abstractCreature.controlled = true;//глючное
+                    orig(self);
+                    self.AI.bug.abstractCreature.controlled = old;
+                }
+                else
+                {
+                    orig(self);
+                }
+            };
             On.DropBugAI.Update += DropBugAI_Update;
             On.DropBugGraphics.ApplyPalette += (On.DropBugGraphics.orig_ApplyPalette orig, DropBugGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette) =>
             {
@@ -48,38 +77,6 @@ namespace StoryMenagerie.Creatures
             if (creatureControllers.TryGetValue(self.creature.realizedCreature, out var p))
             {
                 p.AIUpdate(self);
-            }
-            else
-            {
-                orig(self);
-            }
-        }
-
-        private static void DropBug_Update(On.DropBug.orig_Update orig, DropBug self, bool eu)
-        {
-            if (creatureControllers.TryGetValue(self, out var p))
-            {
-                p.Update(eu);
-                var old = self.AI.bug.abstractCreature.controlled;
-                self.AI.bug.abstractCreature.controlled = true;//глючное
-                orig(self, eu);
-                self.AI.bug.abstractCreature.controlled = old;
-            }
-            else
-            {
-                orig(self, eu);
-            }
-        }
-
-        private static void DropBug_Act(On.DropBug.orig_Act orig, DropBug self)
-        {
-            if (creatureControllers.TryGetValue(self, out var p))
-            {
-                p.ConsciousUpdate();
-                var old = self.AI.bug.abstractCreature.controlled;
-                self.AI.bug.abstractCreature.controlled = true;//глючное
-                orig(self);
-                self.AI.bug.abstractCreature.controlled = old;
             }
             else
             {
