@@ -50,7 +50,7 @@ public static class StoryHooks
         //On.SLOracleBehaviorHasMark.Update += hasmarkUpdate;
         IL.SLOracleBehaviorNoMark.Update += ReplaceOraclePlayerHook;
         On.SLOracleBehavior.Update += On_SLOracleBehavior_Update;
-        On.VoidSea.VoidSeaScene.Update += On_VoidSeaScene_Update;
+        IL.VoidSea.VoidSeaScene.Update += IL_VoidSeaScene_Update;
         IL.VoidSea.VoidWorm.Update += IL_VoidWorm_Update;
         //IL.VoidSea.VoidWorm.BackgroundWormBehavior.Update += ReplaceVoidWormBehaviorPlayerHook;
         //IL.VoidSea.VoidWorm.MainWormBehavior.Update += IL_MainWormBehavior_Update;
@@ -1506,278 +1506,26 @@ public static class StoryHooks
     }
 
     // this is actually so stupid why do they call game.players like 20 individual times
-    public static void On_VoidSeaScene_Update(On.VoidSea.VoidSeaScene.orig_Update orig, VoidSeaScene self, bool eu)
+    public static void IL_VoidSeaScene_Update(ILContext il)
     {
-        if (OnlineManager.lobby == null || OnlineManager.lobby.gameMode is not MenagerieGameMode menagerie)
+        try
         {
-            orig(self, eu);
-            return;
+            int loc = 0;
+            var c = new ILCursor(il);
+            c.GotoNext(MoveType.After,
+                x => x.MatchLdarg(0),
+                x => x.MatchLdfld<UpdatableAndDeletable>("room"),
+                x => x.MatchLdfld<Room>("game"),
+                x => x.MatchCallvirt<RainWorldGame>("get_FirstRealizedPlayer"),
+                x => x.MatchStloc(out loc) //stloc.s V_5
+            );
+            c.Emit(OpCodes.Ldloc, loc);
+            c.EmitDelegate(VoidWormPlayer);
+            c.Emit(OpCodes.Stloc, loc);
         }
-        if (!self.playerInRoom && self.room.game.cameras[0].room == self.room && self.room.game.cameras[0].currentCameraPosition != 0)
+        catch (Exception ex)
         {
-            Custom.Log(new string[]
-            {
-            "INIT VOID SEA"
-            });
-            self.playerInRoom = true;
-            for (int i = 0; i < self.room.world.NumberOfRooms; i++)
-            {
-                if (self.room.world.firstRoomIndex + i != self.room.abstractRoom.index)
-                {
-                    for (int j = self.room.world.GetAbstractRoom(self.room.world.firstRoomIndex + i).entities.Count - 1; j >= 0; j--)
-                    {
-                        self.room.world.GetAbstractRoom(self.room.world.firstRoomIndex + i).entities[j].Destroy();
-                    }
-                    for (int k = self.room.world.GetAbstractRoom(self.room.world.firstRoomIndex + i).entitiesInDens.Count - 1; k >= 0; k--)
-                    {
-                        self.room.world.GetAbstractRoom(self.room.world.firstRoomIndex + i).entitiesInDens[k].Destroy();
-                    }
-                }
-            }
-        }
-        if (ModManager.MSC && self.fadeOutLights)
-        {
-            for (int l = 0; l < self.worms.Count; l++)
-            {
-                self.worms[l].lightAlpha = Mathf.Max(0f, self.worms[l].lightAlpha - 0.001f);
-            }
-            for (int m = 0; m < self.elements.Count; m++)
-            {
-                if (self.elements[m] is DistantWormLight)
-                {
-                    (self.elements[m] as DistantWormLight).alpha = Mathf.Max(0f, (self.elements[m] as DistantWormLight).alpha - 0.001f);
-                }
-            }
-            var crit = menagerie.localAvatars.Where(avi => avi.realizedCreature != null).ToArray()[0].realizedCreature;
-            var slug = crit as Player;
-            if (ModManager.CoopAvailable)
-            {
-                crit = self.room.game.RealizedPlayerFollowedByCamera;
-            }
-            if (crit != null)
-            {
-                self.fadeOutLightsTimer++;
-                if (self.fadeOutLightsTimer == 1)
-                {
-                    self.DestroyCeiling();
-                }
-                if (self.fadeOutLightsTimer == 1000)
-                {
-                    self.DestroyAllWormsExceptMainWorm();
-                }
-                if (self.fadeOutLightsTimer >= 1000 && slug != null)
-                {
-                    self.ArtificerEndUpdate(slug, self.fadeOutLightsTimer - 1000);
-                }
-                else
-                {
-                    self.musicFadeFac = (float)self.fadeOutLightsTimer / 1000f;
-                }
-            }
-        }
-        bool flag = false;
-        bool dead = menagerie.localAvatars[0].state.dead;
-        foreach (var crit2 in menagerie.realizedAvatars)
-        {
-            if (crit2.room == self.room)
-            {
-                if (crit2 == self.room.game.FirstRealizedPlayer || dead)
-                {
-                    self.playerY = crit2.mainBodyChunk.pos.y;
-                    if (CreatureController.creatureControllers.TryGetValue(crit2, out var cc) && cc.isStory(out var scc))
-                    {
-                        scc.inVoidSea = ((self.playerY < self.sceneOrigo.y && !self.Inverted) || (self.playerY > self.sceneOrigo.y && self.Inverted));
-                    }
-                    else if (crit2 is Player slug)
-                    {
-                        slug.inVoidSea = ((self.playerY < self.sceneOrigo.y && !self.Inverted) || (self.playerY > self.sceneOrigo.y && self.Inverted));
-                    }
-                    if (!self.playerDipped && crit2.Submersion > 0.5f)
-                    {
-                        if (self.room.game.manager.musicPlayer != null)
-                        {
-                            self.room.game.manager.musicPlayer.RequestVoidSeaMusic(self);
-                        }
-                        self.playerDipped = true;
-                        self.room.game.cameras[0].EnterCutsceneMode(crit2.abstractCreature, RoomCamera.CameraCutsceneType.VoidSea);
-                        break;
-                    }
-                }
-            }
-        }
-        if (self.playerDipped)
-        {
-            foreach (Player player3 in (from x in self.room.game.NonPermaDeadPlayers
-                                        select (Player)x.realizedCreature into y
-                                        where y != null
-                                        select y).ToList<Player>())
-            {
-                if (player3.redsIllness != null)
-                {
-                    player3.redsIllness.GetBetter();
-                }
-                if (player3.Malnourished)
-                {
-                    player3.SetMalnourished(false);
-                }
-            }
-        }
-        if (!flag || !self.room.game.cameras[0].InCutscene)
-        {
-            self.playerDipped = false;
-        }
-        if (self.room.game.rainWorld.skipVoidSea && self.playerDipped && self.playerY < 1045f && self.room.game.manager.upcomingProcess == null)
-        {
-            self.room.game.ExitToVoidSeaSlideShow();
-            Custom.Log(new string[]
-            {
-            "SKIP VOID"
-            });
-        }
-        if (!self.secondSpace)
-        {
-            float num = 0f;
-            float num2 = float.MaxValue;
-            if (self.Inverted)
-            {
-                self.room.game.cameras[0].virtualMicrophone.volumeGroups[2] = Mathf.InverseLerp(16000f, 40000f, self.room.game.cameras[0].pos.y) * (1f - self.musicFadeFac);
-            }
-            else
-            {
-                self.room.game.cameras[0].virtualMicrophone.volumeGroups[2] = Mathf.InverseLerp(-40000f, -16000f, self.room.game.cameras[0].pos.y) * (1f - self.musicFadeFac);
-            }
-            num = Mathf.Max(num, Mathf.InverseLerp(0f, 0.9f, self.room.game.cameras[0].screenShake));
-            if (!self.secondSpace)
-            {
-                num2 = Mathf.Min(num2, Mathf.Abs(self.room.game.cameras[0].pos.y - self.voidWormsAltitude));
-            }
-            if (self.wooshLoop.Volume < num)
-            {
-                self.wooshLoop.Volume = Custom.LerpAndTick(self.wooshLoop.Volume * (1f - self.musicFadeFac), num, 0.07f, 0.05f);
-            }
-            else
-            {
-                self.wooshLoop.Volume = Custom.LerpAndTick(self.wooshLoop.Volume * (1f - self.musicFadeFac), num, 0.006f, 0.016666668f);
-            }
-            self.wooshLoop.Update();
-            self.wormsLoop.Volume = Mathf.Pow(Custom.SCurve(Mathf.InverseLerp(8000f, 2000f, num2), 0.6f), 0.75f) * (1f - self.musicFadeFac);
-            self.wormsLoop.Update();
-        }
-        else
-        {
-            self.room.game.cameras[0].virtualMicrophone.volumeGroups[2] = 0f;
-            if (self.eggLoop != null && self.theEgg != null)
-            {
-                self.eggLoop.Volume = Mathf.Pow(Custom.SCurve(Mathf.InverseLerp(0.78f, 0.98f, self.eggProximity), 0.5f), 1.7f) * (1f - self.theEgg.whiteFade);
-                self.eggLoop.Update();
-            }
-        }
-        if (self.playerGhosts != null)
-        {
-            self.playerGhosts.Update();
-        }
-
-        // base update
-        self.evenUpdate = eu;
-        if (!self.elementsAddedToRoom)
-        {
-            List<BackgroundScene.BackgroundSceneElement> list = (from pet in self.elements
-                                                                 orderby pet.depth descending
-                                                                 select pet).ToList<BackgroundScene.BackgroundSceneElement>();
-            for (int i = 0; i < list.Count; i++)
-            {
-                self.room.AddObject(list[i]);
-            }
-            if (ModManager.DLCShared && self.room.waterInverted)
-            {
-                self.convergencePoint = new Vector2(self.room.game.rainWorld.screenSize.x / 2f, self.room.game.rainWorld.screenSize.y * 0.33333334f);
-            }
-            else
-            {
-                self.convergencePoint = new Vector2(self.room.game.rainWorld.screenSize.x / 2f, self.room.game.rainWorld.screenSize.y * 2f / 3f);
-            }
-            self.elementsAddedToRoom = true;
-        }
-
-        if (ModManager.MSC)
-        {
-            for (int num3 = 0; num3 < self.room.abstractRoom.creatures.Count; num3++)
-            {
-                if (self.room.abstractRoom.creatures[num3].realizedCreature != null && self.room.abstractRoom.creatures[num3].creatureTemplate.type == MoreSlugcatsEnums.CreatureTemplateType.SlugNPC)
-                {
-                    self.VoidSeaTreatment(self.room.abstractRoom.creatures[num3].realizedCreature as Player, 0.95f);
-                }
-            }
-        }
-        foreach (var acrit in menagerie.abstractAvatars)
-        {
-            if (acrit.Room.index == self.room.abstractRoom.index && acrit.realizedCreature != null)
-            {
-                if (acrit.realizedCreature is Player)
-                {
-                    if (!ModManager.CoopAvailable)
-                    {
-                        self.UpdatePlayerInVoidSea(acrit.realizedCreature as Player);
-                    }
-                    else if (acrit == self.room.game.cameras[0].followAbstractCreature)
-                    {
-                        self.UpdatePlayerInVoidSea(acrit.realizedCreature as Player);
-                    }
-                    else
-                    {
-                        self.VoidSeaTreatment(acrit.realizedCreature as Player, 0.95f);
-                    }
-                }
-                else
-                {
-                    if (acrit == self.room.game.cameras[0].followAbstractCreature)
-                    {
-                        UpdateCreaturesInVoidSea(self, acrit.realizedCreature);
-                    }
-                    else
-                    {
-                        VoidSeaTreatment(self, acrit.realizedCreature, 0.95f);
-                    }
-                }
-            }
-        }
-        var crit3 = menagerie.localAvatars.Where(ac => ac.realizedCreature != null).ToArray()[0].realizedCreature;
-        if (ModManager.CoopAvailable)
-        {
-            crit3 = self.room.game.RealizedPlayerFollowedByCamera;
-        }
-        if (crit3 != null)
-        {
-            self.swimLoop.Update();
-            float val = Vector2.Distance(crit3.bodyChunks[1].lastPos, crit3.bodyChunks[1].pos) + Vector2.Distance(crit3.bodyChunks[0].lastPos, crit3.bodyChunks[0].pos);
-            self.swimLoop.Volume = Custom.LerpMap(val, 0f, 8f, 0.3f, 1f);
-            self.swimLoop.Pitch = Custom.LerpMap(val, 0f, 7f, 0.95f, 1.05f);
-        }
-        if (ModManager.MSC && self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint)
-        {
-            if (self.storedJourneyIllustration != null)
-            {
-                self.storedJourneyIllustration.fadeCounter *= 0.9f;
-            }
-            self.SaintEndUpdate();
-        }
-        if (ModManager.MMF)
-        {
-            for (int num5 = 0; num5 < self.meltingObjects.Count; num5++)
-            {
-                if (!VoidSeaScene.MeltingItem.Valid(self.meltingObjects[num5].meltingObject, self.room))
-                {
-                    Custom.Log(new string[]
-                    {
-                    "remove invalidated melt"
-                    });
-                    self.meltingObjects.RemoveAt(num5);
-                }
-                else
-                {
-                    self.meltingObjects[num5].Update();
-                }
-            }
+            StoryMenagerie.LogError(ex);
         }
     }
 
