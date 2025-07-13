@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BepInEx.Configuration;
+using MoreSlugcats;
 using RainMeadow;
 using UnityEngine;
 
@@ -124,6 +125,10 @@ public class MenagerieGameMode : StoryGameMode
         }
         else
         {
+            if (ModManager.MSC && selectedCreature == MoreSlugcatsEnums.CreatureTemplateType.SlugNPC)
+            {
+                abstractCreature.state = new PlayerState(abstractCreature, 0, MoreSlugcatsEnums.SlugcatStatsName.Slugpup, false);
+            }
             game.GetStorySession.playerSessionRecords[0] = new PlayerSessionRecord(0);
             game.GetStorySession.playerSessionRecords[0].wokeUpInRegion = game.world.region.name;
             if (game.session.Players == null || game.session.Players.Count == 0)

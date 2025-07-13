@@ -42,8 +42,21 @@ public static class GameHooks
         On.ShortcutGraphics.Draw += On_ShortcutGraphics_Draw;
         On.RainWorldGame.ctor += On_RainWorldGame_ctor;
         On.SeedCob.Update += On_SeedCob_Update;
-        IL.RegionState.AdaptRegionStateToWorld += IL_RegionState_AdaptRegionStateToWorld;
+        //IL.RegionState.AdaptRegionStateToWorld += IL_RegionState_AdaptRegionStateToWorld;
         //On.GateKarmaGlyph.ShouldAnimate += On_GateKarmaGlyph_ShouldAnimate;
+        //On.SaveState.GrabSavedCreatures += (On.SaveState.orig_GrabSavedCreatures orig, SaveState self, AbstractCreature player, WorldCoordinate atPos) =>
+        //{
+        //    if (OnlineManager.lobby?.gameMode is MenagerieGameMode)
+        //        self.pendingFriendCreatures.Clear();
+        //    return orig(self, player, atPos);
+        //};
+        On.RegionState.CreatureToStringInDenPos += (On.RegionState.orig_CreatureToStringInDenPos orig, RegionState self, AbstractCreature critter, int validSaveShelter, int activeGate) =>
+        {
+            if (OnlineManager.lobby?.gameMode is MenagerieGameMode)
+                return "";
+            return orig(self, critter, validSaveShelter, activeGate);
+        };
+
 
         On.SLOracleBehaviorHasMark.NameForPlayer += (On.SLOracleBehaviorHasMark.orig_NameForPlayer orig, SLOracleBehaviorHasMark self, bool capitalized) =>
         {
