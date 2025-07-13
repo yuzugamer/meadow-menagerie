@@ -194,6 +194,13 @@ public class StoryMenagerie : BaseUnityPlugin
                 RegisterPlayableCreature("WaterSpitter", CreatureTemplate.Type.LizardTemplate);
                 RegisterPlayableCreature("CommonEel", CreatureTemplate.Type.LizardTemplate);
                 RegisterPlayableCreature("SurfaceSwimmer", CreatureTemplate.Type.EggBug);
+                RegisterPlayableCreature("Scutigera", CreatureTemplate.Type.Centipede);
+                RegisterPlayableCreature("MiniScutigera", CreatureTemplate.Type.Centipede);
+                RegisterPlayableCreature("RedHorrorCenti", CreatureTemplate.Type.Centipede);
+                RegisterPlayableCreature("MiniLeviathan", CreatureTemplate.Type.BigEel);
+                RegisterPlayableCreature("MiniFlyingBigEel", CreatureTemplate.Type.BigEel);
+                // RegisterPlayableCreature("FlyingBigEel", CreatureTemplate.Type.BigEel);
+                // RegisterPlayableCreature("Sporantula", CreatureTemplate.Type.Spider);
             }
             if (ModManager.ActiveMods.Any(mod => mod.id == "myr.moss_fields"))
             {
