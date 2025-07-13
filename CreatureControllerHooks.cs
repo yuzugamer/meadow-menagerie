@@ -354,6 +354,27 @@ public static class CreatureControllerHooks
                 clientData.isDead = self.creature == null || self.creature.dead;
             }
 
+            // copy pasted from rain meadow's playerhooks; disable collision with enough people if in gate or shelter
+            if (RainMeadow.RainMeadow.isStoryMode(out var _) && !self.creature.inShortcut && OnlineManager.players.Count > 4)
+            {
+                if (self.creature.room.abstractRoom.shelter || self.creature.room.IsGateRoom())
+                {
+                    if (!self.creature.IsLocal() && self.creature.collisionLayer != 0)
+                    {
+                        self.creature.room.ChangeCollisionLayerForObject(self.creature, 0);
+
+                    }
+                }
+                else
+                {
+                    if (!self.creature.IsLocal() && self.creature.collisionLayer != 1)
+                    {
+                        self.creature.room.ChangeCollisionLayerForObject(self.creature, 1);
+
+                    }
+                }
+            }
+
             // relevant to story - karma flower placement
             if (story != null)
             {
