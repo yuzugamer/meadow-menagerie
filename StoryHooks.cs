@@ -1991,7 +1991,7 @@ public static class StoryHooks
         voidWormCrits.Add(self, crit);
     }
 
-    public static Creature VoidWormPlayer(VoidWorm self, Creature value)
+    public static Creature VoidWormPlayer(VoidWorm self)
     {
         if (StoryMenagerie.IsMenagerie)// && self != null)
         {
@@ -2012,7 +2012,7 @@ public static class StoryHooks
                 }
             }
         }
-        return value;
+        return self.voidSea.room.game.FirstRealizedPlayer;
     }
 
     public static bool ReplaceVoidWormPlayer(ILCursor c, int ldloc)
@@ -2073,11 +2073,17 @@ public static class StoryHooks
         try
         {
             var c = new ILCursor(il);
-            c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate(FindVoidWormPlayer);
-            while (true)
+            if (c.TryGotoNext(MoveType.After,
+                x => x.MatchLdarg(0),
+                x => x.MatchLdfld<VoidSea.VoidWorm>("voidSea"),
+                x => x.MatchLdfld<UpdatableAndDeletable>("room"),
+                x => x.MatchLdfld<Room>("game"),
+                x => x.MatchCallvirt<RainWorldGame>("get_FirstRealizedPlayer")
+            ))
             {
-                if (!ReplaceVoidWormPlayer(c, 0)) break;
+                c.Emit(OpCodes.Ldarg_0);
+                c.EmitDelegate(VoidWormPlayer);
+                c.Emit(OpCodes.Stloc_0);
             }
         }
         catch (Exception ex)
