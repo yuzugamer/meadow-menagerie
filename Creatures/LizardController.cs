@@ -86,17 +86,17 @@ namespace StoryMenagerie.Creatures
                             {
                                 continue;
                             }
-                            if (obj is Creature crit)
+                        }
+                        if (obj is Creature crit)
+                        {
+                            if (!lizard.AI.DynamicRelationship(crit.abstractCreature).GoForKill)
                             {
-                                if (!lizard.AI.DynamicRelationship(crit.abstractCreature).GoForKill)
-                                {
-                                    tdist *= 1.2f;
-                                }
+                                tdist *= 1.2f;
                             }
-                            else
-                            {
-                                tdist *= 100f;
-                            }
+                        }
+                        else
+                        {
+                            tdist *= 100f;
                         }
                         if (tdist < compare)
                         {
