@@ -33,7 +33,7 @@ namespace StoryMenagerie.Creatures
             }
             if (input[0].AnyDirectionalInput)
             {
-                worm.controlledCharge = new Vector2((float)input[0].x, (float)input[0].y) * 80f;
+                worm.controlledCharge = input[0].analogueDir.normalized * 80f;
             }
             else
             {
