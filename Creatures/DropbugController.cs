@@ -49,8 +49,10 @@ namespace StoryMenagerie.Creatures
                 if (RainMeadow.CreatureController.creatureControllers.TryGetValue(self.bug, out var cc) && cc.isStory(out var scc))
                 {
                     self.blackColor = palette.blackColor;
-                    self.shineColor = Color.Lerp(scc.storyCustomization.bodyColor, palette.fogColor, 0.25f + 0.75f * Mathf.InverseLerp(0.5f, 1f, self.darkness));
-                    self.camoColor = Color.Lerp(palette.blackColor, Color.Lerp(palette.texture.GetPixel(4, 3), palette.fogColor, palette.fogAmount * 0.13333334f), 0.5f);
+                    //self.shineColor = Color.Lerp(scc.storyCustomization.bodyColor, palette.fogColor, 0.25f + 0.75f * Mathf.InverseLerp(0.5f, 1f, self.darkness));
+                    //self.camoColor = Color.Lerp(palette.blackColor, Color.Lerp(palette.texture.GetPixel(4, 3), palette.fogColor, palette.fogAmount * 0.13333334f), 0.5f);
+                    self.shineColor = scc.storyCustomization.bodyColor;
+                    self.camoColor = scc.storyCustomization.bodyColor;
                     self.RefreshColor(0f, sLeaser);
                 }
                 else

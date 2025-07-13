@@ -509,7 +509,7 @@ public static class MeadowHooks
         }
         catch (Exception ex)
         {
-
+            StoryMenagerie.LogError(ex);
         }
     }
 
