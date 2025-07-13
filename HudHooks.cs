@@ -21,7 +21,7 @@ public static class HudHooks
 {
     public static void Apply()
     {
-        IL.RoomCamera.Update += IL_RoomCamera_Update;
+        //IL.RoomCamera.Update += IL_RoomCamera_Update;
         On.HUD.HUD.Update += On_HUD_Update;
         On.HUD.HUD.InitSinglePlayerHud += On_HUD_InitSinglePlayerHud;
         On.RoomCamera.Update += On_RoomCamera_Update;
