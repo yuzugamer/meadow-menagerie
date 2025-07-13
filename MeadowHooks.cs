@@ -69,13 +69,14 @@ public static class MeadowHooks
 
     private static void IL_CreatureController_Update(ILContext il)
     {
-        var c = new ILCursor(il);
-        if (c.TryGotoNext(
-            x => x.MatchLdarg(0),
-            x => x.MatchLdfld<CreatureController>("voice"),
-            x => x.MatchCallvirt<MeadowVoice>("Update")
-            ))
+        try
         {
+            var c = new ILCursor(il);
+            c.GotoNext(
+                x => x.MatchLdarg(0),
+                x => x.MatchLdfld<CreatureController>("voice"),
+                x => x.MatchCallvirt<MeadowVoice>("Update")
+            );
             var skip = c.DefineLabel();
             c.EmitDelegate(ShouldUpdateVoice);
             c.Emit(OpCodes.Brfalse, skip);
@@ -83,63 +84,11 @@ public static class MeadowHooks
             c.Index++;
             c.MarkLabel(skip);
         }
-        else Debug.LogError("CreatureController IL hook failed");
+        catch (Exception ex)
+        {
+            StoryMenagerie.LogError(ex);
+        }
     }
-
-    /*private static void IL_CreatureController_CheckInputs(ILContext il)
-    {
-        var c = new ILCursor(il);
-        var done = false;
-        while (true)
-        {
-            if (c.TryGotoNext(
-                x => x.MatchLdarg(0),
-                x => x.MatchLdfld<CreatureController>("mcd")
-            ))
-            {
-                c.Emit(OpCodes.Ldarg_0);
-                c.EmitDelegate(ShouldUpdateVoice);
-                var skip = c.DefineLabel();
-                var skip2 = c.DefineLabel();
-                c.Emit(OpCodes.Brtrue, skip);
-                c.Emit(OpCodes.Ldarg_0);
-                c.Emit(OpCodes.Isinst, typeof(StoryGroundCreatureController));
-                c.Emit(OpCodes.Ldfld, typeof(StoryGroundCreatureController).GetField("scd"));
-                c.MarkLabel(skip);
-                c.Index += 2;
-                c.MarkLabel(skip2);
-            }
-            else
-            {
-                break;
-            }
-        }
-        c = new ILCursor(il);
-        while (true)
-        {
-            if (c.TryGotoNext(
-                x => x.MatchLdarg(0),
-                x => x.MatchStfld<CreatureController>("mcd")
-            ))
-            {
-                c.Emit(OpCodes.Ldarg_0);
-                c.EmitDelegate(ShouldUpdateVoice);
-                var skip = c.DefineLabel();
-                var skip2 = c.DefineLabel();
-                c.Emit(OpCodes.Brtrue, skip);
-                c.Emit(OpCodes.Ldarg_0);
-                c.Emit(OpCodes.Isinst, typeof(StoryGroundCreatureController));
-                c.Emit(OpCodes.Stfld, typeof(StoryGroundCreatureController).GetField("scd"));
-                c.MarkLabel(skip);
-                c.Index++;
-                c.MarkLabel(skip2);
-            }
-            else
-            {
-                break;
-            }
-        }
-    }*/
 
     public static void On_RainMeadow_ShelterDoorOnClose(On_RainMeadow_orig_ShelterDoorOnClose orig, RainMeadow.RainMeadow _, On.ShelterDoor.orig_Close origorig, ShelterDoor self)
     {
