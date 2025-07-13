@@ -464,15 +464,8 @@ public static class MeadowHooks
     public static bool On_StoryModeExtensions_FriendlyFireSafetyCandidate(Func<PhysicalObject, bool> orig, PhysicalObject creature)
     {
         if (OnlineManager.lobby == null || OnlineManager.lobby.gameMode is not MenagerieGameMode menagerie)
-        {
             return orig(creature);
-        }
-        // slugpups get the spear
-        if ((creature is Player p && !p.isNPC) || (creature is Creature crit && CreatureController.creatureControllers.TryGetValue(crit, out var _)))
-        {
-            return !menagerie.friendlyFire;
-        }
-        return false;
+        return creature is Creature crit && CreatureController.creatureControllers.TryGetValue(crit, out var _);
     }
 
     public static RealizedCreatureState On_AbstractCreatureState_GetRealizedState(Func<AbstractCreatureState, OnlinePhysicalObject, RealizedCreatureState> orig, AbstractCreatureState self, OnlinePhysicalObject onlineObject)
@@ -509,13 +502,19 @@ public static class MeadowHooks
         }
         catch (Exception ex)
         {
-
+            StoryMenagerie.LogError(ex);
         }
     }
 
+    public static int hackyspectatorcounter = 0;
     public static void On_SpectatorHud_Update(Action<SpectatorHud> orig, SpectatorHud self)
     {
         orig(self);
-        self.ReturnCameraToPlayer();
+        ++hackyspectatorcounter;
+        if (hackyspectatorcounter >= 40 * 5)
+        {
+            self.ReturnCameraToPlayer();
+            hackyspectatorcounter = 0;
+        }
     }
 }

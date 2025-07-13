@@ -1,4 +1,5 @@
 using MonoMod.Cil;
+using RainMeadow;
 using RWCustom;
 using System;
 using UnityEngine;
@@ -12,9 +13,52 @@ namespace StoryMenagerie.Creatures
 
         internal static void ApplyHooks()
         {
-            On.DropBug.Update += DropBug_Update;
-            On.DropBug.Act += DropBug_Act;
+            On.DropBug.Update += (On.DropBug.orig_Update orig, DropBug self, bool eu) =>
+            {
+                if (creatureControllers.TryGetValue(self, out var p))
+                {
+                    p.Update(eu);
+                    var old = self.AI.bug.abstractCreature.controlled;
+                    self.AI.bug.abstractCreature.controlled = true;//глючное
+                    orig(self, eu);
+                    self.AI.bug.abstractCreature.controlled = old;
+                }
+                else
+                {
+                    orig(self, eu);
+                }
+            };
+            On.DropBug.Act += (On.DropBug.orig_Act orig, DropBug self) =>
+            {
+                if (creatureControllers.TryGetValue(self, out var p))
+                {
+                    p.ConsciousUpdate();
+                    var old = self.AI.bug.abstractCreature.controlled;
+                    self.AI.bug.abstractCreature.controlled = true;//глючное
+                    orig(self);
+                    self.AI.bug.abstractCreature.controlled = old;
+                }
+                else
+                {
+                    orig(self);
+                }
+            };
             On.DropBugAI.Update += DropBugAI_Update;
+            On.DropBugGraphics.RefreshColor += (On.DropBugGraphics.orig_RefreshColor orig, DropBugGraphics self, float timeStacker, RoomCamera.SpriteLeaser sLeaser) =>
+            {
+                orig(self, timeStacker, sLeaser);
+                if (RainMeadow.CreatureController.creatureControllers.TryGetValue(self.bug, out var cc) && cc.isStory(out var scc))
+                {
+                    for (int i = 0; i < sLeaser.sprites.Length; i++)
+                    {
+                        sLeaser.sprites[i].color = scc.storyCustomization.eyeColor;
+                    }
+                    for (int j = 0; j < (sLeaser.sprites[self.ShineMeshSprite] as TriangleMesh).verticeColors.Length; j++)
+                    {
+                        (sLeaser.sprites[self.ShineMeshSprite] as TriangleMesh).verticeColors[j] = scc.storyCustomization.bodyColor;
+                    }   
+                }
+            };
         }
 
         public override WorldCoordinate CurrentPathfindingPosition
@@ -33,39 +77,11 @@ namespace StoryMenagerie.Creatures
         {
             if (creatureControllers.TryGetValue(self.creature.realizedCreature, out var p))
             {
+                var old = self.bug.abstractCreature.controlled;
+                self.bug.abstractCreature.controlled = true;//глючное
                 p.AIUpdate(self);
-            }
-            else
-            {
                 orig(self);
-            }
-        }
-
-        private static void DropBug_Update(On.DropBug.orig_Update orig, DropBug self, bool eu)
-        {
-            if (creatureControllers.TryGetValue(self, out var p))
-            {
-                p.Update(eu);
-                var old = self.AI.bug.abstractCreature.controlled;
-                self.AI.bug.abstractCreature.controlled = true;//глючное
-                orig(self, eu);
-                self.AI.bug.abstractCreature.controlled = old;
-            }
-            else
-            {
-                orig(self, eu);
-            }
-        }
-
-        private static void DropBug_Act(On.DropBug.orig_Act orig, DropBug self)
-        {
-            if (creatureControllers.TryGetValue(self, out var p))
-            {
-                p.ConsciousUpdate();
-                var old = self.AI.bug.abstractCreature.controlled;
-                self.AI.bug.abstractCreature.controlled = true;//глючное
-                orig(self);
-                self.AI.bug.abstractCreature.controlled = old;
+                self.bug.abstractCreature.controlled = old;
             }
             else
             {

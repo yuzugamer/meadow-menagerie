@@ -45,19 +45,9 @@ public static class CreatureHooks
         On.ShelterDoor.IsThisHostileCreatureForShelter += (On.ShelterDoor.orig_IsThisHostileCreatureForShelter orig, AbstractCreature ac) =>
         {
             // players are not "hostile"
-            if (OnlineManager.lobby?.gameMode is MenagerieGameMode mgm)
-                return !mgm.abstractAvatars.Contains(ac);
+            if (OnlineManager.lobby?.gameMode is MenagerieGameMode mgm && mgm.abstractAvatars.Contains(ac))
+                return false;
             return orig(ac);
-        };
-        On.ShelterDoor.Update += (On.ShelterDoor.orig_Update orig, ShelterDoor self, bool eu) =>
-        {
-            orig(self, eu);
-            ++shelterCleanupCounter;
-            if (shelterCleanupCounter >= 40 * 5) //every 5 seconds
-            {
-                self.killHostiles = true;
-                shelterCleanupCounter = 0;
-            }
         };
     }
 

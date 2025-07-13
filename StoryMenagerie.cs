@@ -56,7 +56,8 @@ public class StoryMenagerie : BaseUnityPlugin
         // dr meadow new
         { CreatureTemplate.Type.DaddyLongLegs, CreatureTemplate.Type.DaddyLongLegs },
         { CreatureTemplate.Type.BrotherLongLegs, CreatureTemplate.Type.DaddyLongLegs },
-        { CreatureTemplate.Type.DropBug, CreatureTemplate.Type.DropBug }
+        { CreatureTemplate.Type.DropBug, CreatureTemplate.Type.DropBug },
+        { CreatureTemplate.Type.PoleMimic, CreatureTemplate.Type.PoleMimic }
     };
 
     public static AbstractCreature.Personality GamerPersonality = new AbstractCreature.Personality { sympathy = 0f, energy = 1f, bravery = 1f, nervous = 0f, aggression = 1f, dominance = 1f};

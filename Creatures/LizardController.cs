@@ -2,32 +2,30 @@
 using RainMeadow;
 using UnityEngine;
 using RWCustom;
-using static MonoMod.InlineRT.MonoModRule;
+using MonoMod.RuntimeDetour;
+using System.Reflection;
+using MonoMod.Cil;
+using Mono.Cecil.Cil;
 
 namespace StoryMenagerie.Creatures
 {
     public class LizardController : RainMeadow.LizardController
     {
-        public int throwCooldown;
-        public int grabHeld;
-        public bool lastThrow;
-        public int lungeTime;
-        public bool lastJump;
-        public bool lastSpec;
-        public int specCooldown;
-        public bool putDown;
-        //public int foodInStomach { get; set; }
+        public int throwCooldown = 0;
+        public int grabHeld = 0;
+        public bool lastThrow = false;
+        public int lungeTime = 0;
+        public bool lastJump = false;
+        public bool lastSpec = false;
+        public int specCooldown = 0;
+        public bool putDown = false;
 
-        /*public static void On_Lizard_Act(On.Lizard.orig_Act orig, Lizard self)
+        public static void ApplyHooks()
         {
-            if (Input.GetKey(KeyCode.L)) RainMeadow.RainMeadow.Debug($"liz act pre");
-            if (creatureControllers.TryGetValue(self, out var c) && c is LizardController l)
-            {
-                l.ConsciousUpdate();
-            }
-            orig(self);
-            if (Input.GetKey(KeyCode.L)) RainMeadow.RainMeadow.Debug($"liz act post");
-        }*/
+            new ILHook(typeof(RainMeadow.LizardController).GetConstructor(new Type[] { typeof(Lizard), typeof(OnlineCreature), typeof(int), typeof(MeadowAvatarData) }), IL_LizardController_ctor);
+            new ILHook(typeof(RainMeadow.LizardController).GetMethod("ConsciousUpdate", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic), IL_LizardController_ConsciousUpdate);
+        }
+
         public LizardController(Lizard lizard, OnlineCreature oc, int playerNumber, CreatureCustomization customization) : base(lizard, oc, playerNumber, new ExpandedAvatarData(customization))
         {
             lizard.effectColor = customization.bodyColor.SafeColorRange();
@@ -516,6 +514,60 @@ namespace StoryMenagerie.Creatures
             if (!lizard.Consious)
             {
                 putDown = false;
+            }
+        }
+
+        public static void IL_LizardController_ctor(ILContext il)
+        {
+            try
+            {
+                var c = new ILCursor(il);
+                c.GotoNext(
+                    x => x.MatchLdarg(1),
+                    x => x.MatchCallvirt<Lizard>("get_effectColor"),
+                    x => x.MatchStloc(0)
+                );
+                c.MoveAfterLabels();
+                c.Emit(OpCodes.Ldarg_0);
+                c.Emit(OpCodes.Isinst, typeof(LizardController));
+                var skip = c.DefineLabel();
+                c.Emit(OpCodes.Brtrue, skip);
+                c.GotoNext(
+                    MoveType.After,
+                    x => x.MatchCallvirt<Lizard>("set_effectColor"),
+                    x => x.MatchNop()
+                );
+                c.MoveAfterLabels();
+                c.MarkLabel(skip);
+            }
+            catch (Exception ex)
+            {
+                StoryMenagerie.LogError(ex);
+            }
+        }
+
+        public static void IL_LizardController_ConsciousUpdate(ILContext il)
+        {
+            try
+            {
+                // don't judge me
+                var c = new ILCursor(il);
+                c.GotoNext(
+                    MoveType.After,
+                    x => x.MatchCall<GroundCreatureController>(nameof(GroundCreatureController.ConsciousUpdate)),
+                    x => x.MatchNop()
+                );
+                c.MoveAfterLabels();
+                c.Emit(OpCodes.Ldarg_0);
+                c.Emit(OpCodes.Isinst, typeof(LizardController));
+                var skip = c.DefineLabel();
+                c.Emit(OpCodes.Brfalse, skip);
+                c.Emit(OpCodes.Ret);
+                c.MarkLabel(skip);
+            }
+            catch (Exception ex)
+            {
+                StoryMenagerie.LogError(ex);
             }
         }
     }

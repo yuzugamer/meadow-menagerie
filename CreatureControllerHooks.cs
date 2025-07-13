@@ -32,10 +32,28 @@ public static class CreatureControllerHooks
         Creatures.JetFishController.ApplyHooks();
         Creatures.YeekController.ApplyHooks();
         Creatures.BigEelController.ApplyHooks();
+        Creatures.EggbugController.ApplyHooks();
+        Creatures.LizardController.ApplyHooks();
         // Dr meadow
         Creatures.LongLegsController.ApplyHooks();
         Creatures.BarnacleController.ApplyHooks();
         Creatures.DropBugController.ApplyHooks();
+
+        On.Creature.SafariControlInputUpdate += (On.Creature.orig_SafariControlInputUpdate orig, Creature self, int index) =>
+        {
+            // Non local? Don't own!
+            if (OnlineManager.lobby != null && !self.IsLocal())
+            {
+                self.inputWithoutDiagonals = null;
+                self.lastInputWithoutDiagonals = null;
+                self.inputWithDiagonals = null;
+                self.lastInputWithDiagonals = null;
+            }
+            else
+            {
+                orig(self, index);
+            }
+        };
 
         //GetSpecialInput = typeof(CreatureController).GetMethod("GetSpecialInput", BindingFlags.NonPublic | BindingFlags.Instance);
         //CreatureControllerMoving = typeof(CreatureController).GetMethod("Moving", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -47,10 +65,7 @@ public static class CreatureControllerHooks
         new Hook(typeof(CreatureController).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance), On_CreatureController_Update);
         new Hook(typeof(CreatureController).GetMethod("get_CurrentFood", BindingFlags.Instance | BindingFlags.Public), On_get_CurrentFood);
         new Hook(typeof(CreatureController).GetMethod("CheckInput", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic), On_CreatureController_CheckInput);
-        new ILHook(typeof(LizardController).GetConstructor(new Type[] { typeof(Lizard), typeof(OnlineCreature), typeof(int), typeof(MeadowAvatarData) }), IL_LizardController_ctor);
-        new ILHook(typeof(LizardController).GetMethod("ConsciousUpdate", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic), IL_LizardController_ConsciousUpdate);
         new Hook(typeof(NoodleController).GetMethod(nameof(NoodleController.NeedleWormGraphics_ApplyPalette), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public), On_NoodleController_NeedleWormGraphics_ApplyPalette);
-        new Hook(typeof(EggbugController).GetMethod(nameof(EggbugController.EggBugGraphics_ApplyPalette), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public), On_EggBugController_EggBugGraphics_ApplyPalette);
         new Hook(typeof(ScavengerController).GetMethod(nameof(ScavengerController.ScavengerGraphics_ctor), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public), On_ScavengerController_ScavengerGraphics_ctor);
         //var scavengerController = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(t => t.IsClass && t.Namespace == nameof(RainMeadow)).First(t => t.Name == "ScavengerController");
         //new Hook(scavengerController.GetMethod("ConsciousUpdate", BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic), On_ScavengerController_ConsciousUpdate);
@@ -244,7 +259,7 @@ public static class CreatureControllerHooks
             self.needsLight = story.saveState.deathPersistentSaveData.theMark;
 
             //StoryMenagerie.LogDebug("current stun is set to" + self.creature.stun);
-            if (local && self.creature.room != null && self.creature.room.game.devToolsActive && self.onlineCreature.isMine)
+            if (self.creature.IsLocal() && self.creature.room != null && self.creature.room.game.devToolsActive && self.onlineCreature.isMine)
             {
                 // relevant to story
                 if (Input.GetKeyDown("q"))
@@ -257,7 +272,7 @@ public static class CreatureControllerHooks
             // bunch of unimplemented story things
             // relevant to story
             // shelter activation
-            if (local && story != null)
+            if (self.creature.IsLocal() && story != null)
             {
                 var menagerie = OnlineManager.lobby.gameMode as MenagerieGameMode;
                 var clientData = menagerie.storyClientData;
@@ -333,20 +348,15 @@ public static class CreatureControllerHooks
                 }
                 else
                 {
-                    if (devTools) StoryMenagerie.Debug("Not sheltering, is local: " + local + " is shelter: " + self.creature.room.abstractRoom.shelter + " is story: " + self.creature.room.game.IsStorySession + " is alive: " + !self.creature.dead + " sleep counter is 0: " + self.sleepCounter == 0 + " shelter door exists:" + (self.creature.room.shelterDoor != null) + " shelter door not broken" + (self.creature.room.shelterDoor == null ? false : !self.creature.room.shelterDoor.Broken));
+                    if (devTools) StoryMenagerie.Debug("Not sheltering, is local: " + self.creature.IsLocal() + " is shelter: " + self.creature.room.abstractRoom.shelter + " is story: " + self.creature.room.game.IsStorySession + " is alive: " + !self.creature.dead + " sleep counter is 0: " + self.sleepCounter == 0 + " shelter door exists:" + (self.creature.room.shelterDoor != null) + " shelter door not broken" + (self.creature.room.shelterDoor == null ? false : !self.creature.room.shelterDoor.Broken));
                 }
 
                 clientData.isDead = self.creature == null || self.creature.dead;
             }
 
-            // relevant to story
-            // karma flower placement
+            // relevant to story - karma flower placement
             if (story != null)
             {
-                //if (self.creature.room.game.cameras[0].hud != null && !self.creature.room.game.cameras[0].hud.textPrompt.gameOverMode)
-                //{
-                //    self.SessionRecord.time++;
-                //}
                 if (!self.creature.dead && self.creature.grabbedBy.Count == 0 && self.creature.IsTileSolid(self.creature.mainBodyChunkIndex, 0, -1))
                 {
                     var pos = self.creature.mainBodyChunk.pos;
@@ -356,37 +366,7 @@ public static class CreatureControllerHooks
                     }
                 }
             }
-            /*
-            // relevant to story
-            // SHROOMIES
-            if (this.mushroomCounter > 0)
-            {
-                if (!this.inShortcut)
-                {
-                    this.mushroomCounter--;
-                }
-                this.mushroomEffect = Custom.LerpAndTick(this.mushroomEffect, 1f, 0.05f, 0.025f);
-            }
-            else
-            {
-                this.mushroomEffect = Custom.LerpAndTick(this.mushroomEffect, 0f, 0.025f, 0.014285714f);
-            }
-            if (this.Adrenaline > 0f)
-            {
-                if (this.adrenalineEffect == null)
-                {
-                    this.adrenalineEffect = new AdrenalineEffect(this);
-                    this.room.AddObject(this.adrenalineEffect);
-                }
-                else if (this.adrenalineEffect.slatedForDeletetion)
-                {
-                    this.adrenalineEffect = null;
-                }
-            }
-
-            // relevant to story
-            // death grasp
-             this is from vanilla but could be reworked into a more flexible system.*/
+            /* this is from vanilla but could be reworked into a more flexible system.*/
             var dangerGrasp = scc.dangerGrasp;
             if (dangerGrasp == null)
             {
@@ -408,51 +388,12 @@ public static class CreatureControllerHooks
             {
                 scc.dangerGraspTime++;
                 // lizards will eventually drop things they can't eat (with the exception of major statistical anomalies), which means the grasp is not fatal
-                if (scc.dangerGraspTime == 60 && local && (dangerGrasp.grabber is not Lizard liz || liz.AI.DynamicRelationship((self.creature as Creature).abstractCreature).type == CreatureTemplate.Relationship.Type.Eats))
+                if (scc.dangerGraspTime == 60 && self.creature.IsLocal() && (dangerGrasp.grabber is not Lizard liz || liz.AI.DynamicRelationship((self.creature as Creature).abstractCreature).type == CreatureTemplate.Relationship.Type.Eats))
                 {
                     self.creature.room.game.GameOver(dangerGrasp);
                 }
             }
 
-            // relevant to story AND meadow?
-            // map progression specifics
-            /*if (this.MapDiscoveryActive && this.coord != this.lastCoord)
-            {
-                if (this.exitsToBeDiscovered == null)
-                {
-                    if (this.room != null && this.room.shortCutsReady)
-                    {
-                        this.exitsToBeDiscovered = new List<Vector2>();
-                        for (int i = 0; i < this.room.shortcuts.Length; i++)
-                        {
-                            if (this.room.shortcuts[i].shortCutType == ShortcutData.Type.RoomExit)
-                            {
-                                this.exitsToBeDiscovered.Add(this.room.MiddleOfTile(this.room.shortcuts[i].StartTile));
-                            }
-                        }
-                    }
-                }
-                else if (this.exitsToBeDiscovered.Count > 0 && this.room.game.cameras[0].hud != null && this.room.game.cameras[0].hud.map != null && !this.room.CompleteDarkness(this.firstChunk.pos, 0f, 0.95f, false))
-                {
-                    int index = UnityEngine.Random.Range(0, this.exitsToBeDiscovered.Count);
-                    if (this.room.ViewedByAnyCamera(this.exitsToBeDiscovered[index], -10f))
-                    {
-                        Vector2 vector = this.firstChunk.pos;
-                        for (int j = 0; j < 20; j++)
-                        {
-                            if (Custom.DistLess(vector, this.exitsToBeDiscovered[index], 50f))
-                            {
-                                this.room.game.cameras[0].hud.map.ExternalExitDiscover((vector + this.exitsToBeDiscovered[index]) / 2f, this.room.abstractRoom.index);
-                                this.room.game.cameras[0].hud.map.ExternalOnePixelDiscover(this.exitsToBeDiscovered[index], this.room.abstractRoom.index);
-                                this.exitsToBeDiscovered.RemoveAt(index);
-                                break;
-                            }
-                            this.room.game.cameras[0].hud.map.ExternalSmallDiscover(vector, this.room.abstractRoom.index);
-                            vector += Custom.DirVec(vector, this.exitsToBeDiscovered[index]) * 50f;
-                        }
-                    }
-                }
-            }*/
             if (self.creature.grabbedBy.Count < 1)
             {
                 var stuck = true;
@@ -468,7 +409,7 @@ public static class CreatureControllerHooks
                 {
                     Custom.LogWarning(new string[]
                     {
-                "WALLSTUCK"
+                        "WALLSTUCK"
                     });
                     self.creature.bodyChunks[0].HardSetPosition(self.creature.bodyChunks[0].pos + Custom.DirVec(self.creature.bodyChunks[0].pos, self.creature.bodyChunks[1].pos) * 2f);
                     var move = new Vector2(self.input[0].x, self.input[0].y).normalized * 1.5f;
@@ -483,61 +424,6 @@ public static class CreatureControllerHooks
             }
         }
     }
-
-    public static void IL_LizardController_ctor(ILContext il)
-    {
-        try
-        {
-            var c = new ILCursor(il);
-            c.GotoNext(
-                x => x.MatchLdarg(1),
-                x => x.MatchCallvirt<Lizard>("get_effectColor"),
-                x => x.MatchStloc(0)
-            );
-            c.MoveAfterLabels();
-            c.Emit(OpCodes.Ldarg_0);
-            c.Emit(OpCodes.Isinst, typeof(LizardController));
-            var skip = c.DefineLabel();
-            c.Emit(OpCodes.Brtrue, skip);
-            c.GotoNext(
-                MoveType.After,
-                x => x.MatchCallvirt<Lizard>("set_effectColor"),
-                x => x.MatchNop()
-            );
-            c.MoveAfterLabels();
-            c.MarkLabel(skip);
-        }
-        catch (Exception ex)
-        {
-            StoryMenagerie.LogError(ex);
-        }
-    }
-
-    public static void IL_LizardController_ConsciousUpdate(ILContext il)
-    {
-        try
-        {
-            // don't judge me
-            var c = new ILCursor(il);
-            c.GotoNext(
-                MoveType.After,
-                x => x.MatchCall<GroundCreatureController>(nameof(GroundCreatureController.ConsciousUpdate)),
-                x => x.MatchNop()
-            );
-            c.MoveAfterLabels();
-            c.Emit(OpCodes.Ldarg_0);
-            c.Emit(OpCodes.Isinst, typeof(LizardController));
-            var skip = c.DefineLabel();
-            c.Emit(OpCodes.Brfalse, skip);
-            c.Emit(OpCodes.Ret);
-            c.MarkLabel(skip);
-        }
-        catch (Exception ex)
-        {
-            StoryMenagerie.LogError(ex);
-        }
-    }
-
 
     // this might be one of the worst things i've ever had to do
     public static void On_NoodleController_NeedleWormGraphics_ApplyPalette(Action<ILContext> orig, ILContext il)
@@ -561,49 +447,6 @@ public static class CreatureControllerHooks
                 p.customization.ModifyBodyColor(ref self.highLightColor);
                 self.highLightColor = Color.Lerp(self.highLightColor, Color.white, 0.4f);
                 p.customization.ModifyBodyColor(ref self.bodyColor);
-            }
-        });
-    }
-
-    // the sequel
-    public static void On_EggBugController_EggBugGraphics_ApplyPalette(ILContext il)
-    {
-        var c = new ILCursor(il);
-
-        c.GotoNext(MoveType.AfterLabel,
-            i => i.MatchStfld<EggBugGraphics>("blackColor")
-            );
-
-        c.GotoPrev(MoveType.After,
-            i => i.MatchStloc(out _));
-
-        c.MoveAfterLabels();
-        c.Emit(OpCodes.Ldarg_0);
-        c.Emit(OpCodes.Ldloca, 0);
-        c.Emit(OpCodes.Ldloca, 1);
-        c.EmitDelegate((EggBugGraphics self, ref Color c1, ref Color c2) =>
-        {
-            if (creatureControllers.TryGetValue(self.bug, out var p))
-            {
-                var diff = c1 - c2;
-                p.customization.ModifyBodyColor(ref c1);
-                p.customization.ModifyBodyColor(ref c2);
-                c2 += diff;
-            }
-        });
-
-        // egg colors
-        c.GotoNext(i => i.MatchCallOrCallvirt<EggBugGraphics>("EggColors"));
-        c.GotoNext(MoveType.After, i => i.MatchStfld<EggBugGraphics>("eggColors"));
-        c.MoveAfterLabels();
-        c.Emit(OpCodes.Ldarg_0);
-        c.EmitDelegate((EggBugGraphics self) =>
-        {
-            if (creatureControllers.TryGetValue(self.bug, out var p))
-            {
-                p.customization.ModifyBodyColor(ref self.eggColors[0]);
-                p.customization.ModifyBodyColor(ref self.eggColors[1]);
-                p.customization.ModifyBodyColor(ref self.eggColors[2]);
             }
         });
     }
