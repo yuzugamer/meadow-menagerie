@@ -21,11 +21,12 @@ public static class MeadowHooks
         try
         {
             new Hook(typeof(MeadowVoice).GetConstructor(new Type[] { typeof(CreatureController) }), On_MeadowVoice_ctor);
-            new Hook(typeof(MeadowVoice).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance), On_MeadowVoice_Update);
+            new Hook(typeof(MeadowVoice).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance), On_MeadowVoice_Update);
+            new Hook(typeof(MeadowVoice).GetMethod("Call", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance), On_MeadowVoice_Call);
             //new ILHook(typeof(CreatureController).GetMethod("Update", BindingFlags.Public | BindingFlags.Instance), IL_CreatureController_Update);
             //new Hook(typeof(CreatureController).GetMethod("ConsciousUpdate", BindingFlags.Public | BindingFlags.Instance), On_CreatureController_ConsciousUpdate);
             //new ILHook(typeof(CreatureController).GetMethod("CheckInputs", BindingFlags.Public | BindingFlags.Instance), IL_CreatureController_CheckInputs);
-            new Hook(typeof(RainMeadow.RainMeadow).GetMethod("ShelterDoorOnClose", BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic), On_RainMeadow_ShelterDoorOnClose);
+            new Hook(typeof(RainMeadow.RainMeadow).GetMethod("ShelterDoorOnClose", BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public), On_RainMeadow_ShelterDoorOnClose);
             Debug.Log("all fine and great!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             new Hook(typeof(RainMeadow.RainMeadow).GetMethod("Player_AddFood", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public), On_RainMeadow_Player_AddFood);
             new Hook(typeof(RainMeadow.RainMeadow).GetMethod("Player_SubtractFood", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public), On_RainMeadow_Player_SubtractFood);
@@ -54,6 +55,11 @@ public static class MeadowHooks
     }
 
     public static void On_MeadowVoice_Update(On_MeadowVoice_orig_Update orig, MeadowVoice self)
+    {
+        if (OnlineManager.lobby.gameMode is not MenagerieGameMode) orig(self);
+    }
+
+    public static void On_MeadowVoice_Call(Action<MeadowVoice> orig, MeadowVoice self)
     {
         if (OnlineManager.lobby.gameMode is not MenagerieGameMode) orig(self);
     }
