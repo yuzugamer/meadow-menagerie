@@ -44,20 +44,19 @@ namespace StoryMenagerie.Creatures
                 }
             };
             On.DropBugAI.Update += DropBugAI_Update;
-            On.DropBugGraphics.ApplyPalette += (On.DropBugGraphics.orig_ApplyPalette orig, DropBugGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette) =>
+            On.DropBugGraphics.RefreshColor += (On.DropBugGraphics.orig_RefreshColor orig, DropBugGraphics self, float timeStacker, RoomCamera.SpriteLeaser sLeaser) =>
             {
+                orig(self, timeStacker, sLeaser);
                 if (RainMeadow.CreatureController.creatureControllers.TryGetValue(self.bug, out var cc) && cc.isStory(out var scc))
                 {
-                    self.blackColor = palette.blackColor;
-                    //self.shineColor = Color.Lerp(scc.storyCustomization.bodyColor, palette.fogColor, 0.25f + 0.75f * Mathf.InverseLerp(0.5f, 1f, self.darkness));
-                    //self.camoColor = Color.Lerp(palette.blackColor, Color.Lerp(palette.texture.GetPixel(4, 3), palette.fogColor, palette.fogAmount * 0.13333334f), 0.5f);
-                    self.shineColor = scc.storyCustomization.bodyColor;
-                    self.camoColor = scc.storyCustomization.bodyColor;
-                    self.RefreshColor(0f, sLeaser);
-                }
-                else
-                {
-                    orig(self, sLeaser, rCam, palette);
+                    for (int i = 0; i < sLeaser.sprites.Length; i++)
+                    {
+                        sLeaser.sprites[i].color = scc.storyCustomization.eyeColor;
+                    }
+                    for (int j = 0; j < (sLeaser.sprites[self.ShineMeshSprite] as TriangleMesh).verticeColors.Length; j++)
+                    {
+                        (sLeaser.sprites[self.ShineMeshSprite] as TriangleMesh).verticeColors[j] = scc.storyCustomization.bodyColor;
+                    }   
                 }
             };
         }
@@ -78,7 +77,11 @@ namespace StoryMenagerie.Creatures
         {
             if (creatureControllers.TryGetValue(self.creature.realizedCreature, out var p))
             {
+                var old = self.bug.abstractCreature.controlled;
+                self.bug.abstractCreature.controlled = true;//глючное
                 p.AIUpdate(self);
+                orig(self);
+                self.bug.abstractCreature.controlled = old;
             }
             else
             {
