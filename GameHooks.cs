@@ -42,6 +42,7 @@ public static class GameHooks
         On.ShortcutGraphics.Draw += On_ShortcutGraphics_Draw;
         On.RainWorldGame.ctor += On_RainWorldGame_ctor;
         On.SeedCob.Update += On_SeedCob_Update;
+        IL.RegionState.AdaptRegionStateToWorld += IL_RegionState_AdaptRegionStateToWorld;
         //On.GateKarmaGlyph.ShouldAnimate += On_GateKarmaGlyph_ShouldAnimate;
 
         On.SLOracleBehaviorHasMark.NameForPlayer += (On.SLOracleBehaviorHasMark.orig_NameForPlayer orig, SLOracleBehaviorHasMark self, bool capitalized) =>
@@ -1152,6 +1153,28 @@ public static class GameHooks
                     }
                 }
             }
+        }
+    }
+
+    public static void IL_RegionState_AdaptRegionStateToWorld(ILContext il)
+    {
+        try
+        {
+            var c = new ILCursor(il);
+            var skip = c.DefineLabel();
+            c.GotoNext(
+                x => x.MatchLdsfld<AbstractPhysicalObject.AbstractObjectType>(nameof(AbstractPhysicalObject.AbstractObjectType.KarmaFlower)),
+                x => x.MatchCallOrCallvirt<AbstractPhysicalObject.AbstractObjectType>("op_Inequality"),
+                x => x.MatchBrfalse(out skip)
+            );
+            c.Emit(OpCodes.Ldloc, 4);
+            c.Emit(OpCodes.Ldloc, 5);
+            c.EmitDelegate((AbstractRoom room, int i) => OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode menagerie && room.entities[i] is AbstractCreature acrit && menagerie.abstractAvatars.Contains(acrit));
+            c.Emit(OpCodes.Brtrue, skip);
+        }
+        catch (Exception ex)
+        {
+            StoryMenagerie.LogError(ex);
         }
     }
 }
