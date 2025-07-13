@@ -69,22 +69,26 @@ namespace StoryMenagerie
 
         private static void IL_StoryOnlineMenu_SetupSlugcatList(ILContext il)
         {
-            var c = new ILCursor(il);
-            var skip = c.DefineLabel();
-            c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate(ShouldSetupSlugcatList);
-            c.Emit(OpCodes.Brtrue, skip);
-            c.Emit(OpCodes.Ret);
-            c.MarkLabel(skip);
-            if (c.TryGotoNext(
-                MoveType.After,
-                x => x.MatchLdcR4(394)
-                ))
+            try
             {
+                var c = new ILCursor(il);
+                var skip = c.DefineLabel();
+                c.Emit(OpCodes.Ldarg_0);
+                c.EmitDelegate(ShouldSetupSlugcatList);
+                c.Emit(OpCodes.Brtrue, skip);
+                c.Emit(OpCodes.Ret);
+                c.MarkLabel(skip);
+                c.GotoNext(
+                    MoveType.After,
+                    x => x.MatchLdcR4(394)
+                );
                 c.Emit(OpCodes.Ldarg_0);
                 c.EmitDelegate(SlugcatListPos);
             }
-            else UnityEngine.Debug.Log("IL hook failed first part");
+            catch (Exception ex)
+            {
+                StoryMenagerie.LogError(ex);
+            }
         }
     }
 }
