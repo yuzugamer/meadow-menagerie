@@ -38,6 +38,7 @@ public static class MeadowHooks
             new Hook(typeof(StoryModeExtensions).GetMethod(nameof(StoryModeExtensions.FriendlyFireSafetyCandidate), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic), On_StoryModeExtensions_FriendlyFireSafetyCandidate);
             new Hook(typeof(AbstractPhysicalObjectState).GetMethod(nameof(AbstractPhysicalObjectState.GetRealizedState), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public), On_AbstractCreatureState_GetRealizedState);
             new ILHook(typeof(OnlinePlayerDeathBump).GetMethod("Draw", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic), IL_OnlinePlayerDeathBump_Draw);
+            new Hook(typeof(SpectatorHud).GetMethod(nameof(SpectatorHud.ReturnCameraToPlayer), BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic), On_SpectatorHud_Update);
         }
         catch (Exception ex)
         {
@@ -561,5 +562,11 @@ public static class MeadowHooks
         {
 
         }
+    }
+
+    public static void On_SpectatorHud_Update(Action<SpectatorHud> orig, SpectatorHud self)
+    {
+        orig(self);
+        self.ReturnCameraToPlayer();
     }
 }
