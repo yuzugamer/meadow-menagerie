@@ -165,10 +165,8 @@ namespace StoryMenagerie.Creatures
 
         public override bool HasFooting => yeek.OnGround;
 
-        public override bool IsOnGround => IsTileGround(1, 0, -1) || IsTileGround(0, 0, -1) || (!IsOnPole && IsTileGround(2, 0, -1));
-
-        public override bool IsOnPole => GetTile(0).AnyBeam || GetTile(1).AnyBeam;
-
+        public override bool IsOnGround => IsTileGround(0, 0, -1) || IsTileGround(1, 0, -1);
+        public override bool IsOnPole => !IsOnGround && GetTile(0).AnyBeam;
         public override bool IsOnCorridor => GetAITile(0).narrowSpace;
 
         public override bool IsOnClimb
