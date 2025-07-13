@@ -397,7 +397,7 @@ public static class CreatureHooks
         orig(self);
         if (StoryMenagerie.IsMenagerie && CreatureController.creatureControllers.TryGetValue(self, out var crit))
         {
-            if (self.impaleChunk != null && self.impaleChunk.owner is Creature target && !target.dead)
+            if (self.IsLocal() && self.impaleChunk != null && self.impaleChunk.owner is Creature target && !target.dead)
             {
                 crit.AddFood(1);
             }
@@ -426,7 +426,10 @@ public static class CreatureHooks
                     }
                     pomegranate.Smash();
                 }
-                crit.AddFood(10);
+                if (self.IsLocal())
+                {
+                    crit.AddFood(10);
+                }
                 var stabPos = result.collisionPoint - value * self.fangLength * 0.7f;
                 self.stuckDir = Vector3.Slerp(self.swishDir.Value, Custom.DirVec(stabPos, result.chunk.pos), 0.4f);
                 self.swishCounter = 0;
