@@ -111,7 +111,6 @@ public class MenagerieGameMode : StoryGameMode
     public override AbstractCreature SpawnAvatar(RainWorldGame game, WorldCoordinate location)
     {
         RainMeadow.RainMeadow.DebugMe();
-        RainMeadow.RainMeadow.sSpawningAvatar = true;
         AbstractCreature abstractCreature;
         var id = new EntityID(-1, critID);
         // alt seed only works for non-negative numbers, due to "RandomSeed" - which is the primary way of getting the id number - only returning altSeed if it's above -1
