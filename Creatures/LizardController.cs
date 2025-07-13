@@ -44,7 +44,7 @@ namespace StoryMenagerie.Creatures
 
             var lizPos = lizard.mainBodyChunk.pos;
             var dist = lizard.lizardParams.attemptBiteRadius + 5f;
-            var compare = dist;
+            var compare = float.MaxValue;
             PhysicalObject target = null;
             /*foreach (var layer in lizard.room.physicalObjects)
             {
@@ -87,6 +87,10 @@ namespace StoryMenagerie.Creatures
                         }
                         if (obj is Creature crit)
                         {
+                            if (OnlineManager.lobby.gameMode is MenagerieGameMode menagerie && !menagerie.friendlyFire && menagerie.abstractAvatars.Contains(crit.abstractCreature))
+                            {
+                                continue;
+                            }
                             if (!lizard.AI.DynamicRelationship(crit.abstractCreature).GoForKill)
                             {
                                 tdist *= 1.2f;
@@ -94,7 +98,7 @@ namespace StoryMenagerie.Creatures
                         }
                         else
                         {
-                            tdist *= 100f;
+                            tdist *= 10f;
                         }
                         if (tdist < compare)
                         {
