@@ -277,9 +277,9 @@ public static class StoryHooks
             x => x.MatchLdfld<OracleBehavior>(nameof(OracleBehavior.player))
         ))
         {
-            c.MoveAfterLabels();
-            c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate(CritOrSlug);
+        c.MoveAfterLabels();
+        c.Emit(OpCodes.Ldarg_0);
+        c.EmitDelegate(CritOrSlug);
             StoryMenagerie.Debug("Oracle player field successfully replaced");
             return true;
         }
@@ -299,8 +299,8 @@ public static class StoryHooks
     public static void IL_OracleArm_Update(ILContext il)
     {
         var c = new ILCursor(il);
-        ReplaceOraclePlayer(c);
-        ReplaceOraclePlayer(c);
+            ReplaceOraclePlayer(c);
+            ReplaceOraclePlayer(c);
     }
 
     public static void IL_OracleGraphics_DrawSprites(ILContext il)
@@ -315,9 +315,9 @@ public static class StoryHooks
     public static void IL_OracleGraphics_Update(ILContext il)
     {
         var c = new ILCursor(il);
-        for (int i = 0; i < 17; i++)
-        {
-            ReplaceOraclePlayer(c);
+            for (int i = 0; i < 17; i++)
+            {
+                ReplaceOraclePlayer(c);
         }
     }
 
@@ -519,28 +519,30 @@ public static class StoryHooks
 
     public static Creature SSSubCritOrSlug(Creature orig, SSOracleBehavior.SubBehavior self) => OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode && oracleCrits.TryGetValue(self.owner, out var crit) ? crit : orig;
 
-    public static bool ReplaceOracleSubGetPlayer(ILCursor c)
+    public static void ReplaceOracleSubGetPlayer(ILCursor c)
     {
-        if (c.TryGotoNext(
+        c.TryGotoNext(
             MoveType.After,
             x => x.MatchCallOrCallvirt<SSOracleBehavior.SubBehavior>("get_player")
-        ))
-        {
-            c.MoveAfterLabels();
-            c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate(SSSubCritOrSlug);
-            StoryMenagerie.Debug("Oracle player field successfully replaced");
-            return true;
-        }
-        StoryMenagerie.LogError("Oracle player was not replaced!");
-        return false;
+        );
+        c.MoveAfterLabels();
+        c.Emit(OpCodes.Ldarg_0);
+        c.EmitDelegate(SSSubCritOrSlug);
+        StoryMenagerie.Debug("Oracle player field successfully replaced");
     }
 
     public static void IL_SSSubBehavior_ReplaceTwo(ILContext il)
     {
-        var c = new ILCursor(il);
-        ReplaceOracleSubGetPlayer(c);
-        ReplaceOracleSubGetPlayer(c);
+        try
+        {
+            var c = new ILCursor(il);
+            ReplaceOracleSubGetPlayer(c);
+            ReplaceOracleSubGetPlayer(c);
+        }
+        catch (Exception ex)
+        {
+            StoryMenagerie.LogError(ex);
+        }
     }
 
     public static void IL_SSOracleMeetWhite_Update(ILContext il)
@@ -1807,18 +1809,16 @@ public static class StoryHooks
         try
         {
             var c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After,
+            c.GotoNext(MoveType.After,
                 x => x.MatchLdarg(0),
                 x => x.MatchLdfld<VoidSea.VoidWorm>("voidSea"),
                 x => x.MatchLdfld<UpdatableAndDeletable>("room"),
                 x => x.MatchLdfld<Room>("game"),
                 x => x.MatchCallvirt<RainWorldGame>("get_FirstRealizedPlayer")
-            ))
-            {
-                c.Emit(OpCodes.Ldarg_0);
-                c.EmitDelegate(VoidWormPlayer);
-                c.Emit(OpCodes.Stloc_0);
-            }
+            );
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate(VoidWormPlayer);
+            c.Emit(OpCodes.Stloc_0);
         }
         catch (Exception ex)
         {

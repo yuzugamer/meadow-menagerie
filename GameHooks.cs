@@ -44,15 +44,29 @@ public static class GameHooks
         On.SeedCob.Update += On_SeedCob_Update;
         //On.GateKarmaGlyph.ShouldAnimate += On_GateKarmaGlyph_ShouldAnimate;
 
+        On.SLOracleBehaviorHasMark.NameForPlayer += (On.SLOracleBehaviorHasMark.orig_NameForPlayer orig, SLOracleBehaviorHasMark self, bool capitalized) =>
+        {
+            if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode gameMode)
+            {
+                return "gamer";
+            }
+            else
+            {
+                return orig(self, capitalized);
+            }
+        };
         On.SLOracleBehaviorHasMark.InitateConversation += (On.SLOracleBehaviorHasMark.orig_InitateConversation orig, SLOracleBehaviorHasMark self) =>
         {
-            self.dialogBox.Interrupt(self.Translate("you'll pay for your slugsins."), 5);
+            if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode gameMode)
+            {
+                self.dialogBox.Interrupt(self.Translate("you'll pay for your slugsins."), 5);
+            }
             orig(self);
         };
 
         On.SSOracleBehavior.PebblesConversation.AddEvents += (On.SSOracleBehavior.PebblesConversation.orig_AddEvents orig, SSOracleBehavior.PebblesConversation self) =>
         {
-			if (self.id == Conversation.ID.Pebbles_White && OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode gameMode)
+			if (OnlineManager.lobby != null && OnlineManager.lobby.gameMode is MenagerieGameMode gameMode && self.id == Conversation.ID.Pebbles_White)
 			{
 				if (!self.owner.playerEnteredWithMark)
 				{

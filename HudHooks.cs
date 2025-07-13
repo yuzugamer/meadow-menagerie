@@ -79,7 +79,7 @@ public static class HudHooks
         {
             var c = new ILCursor(il);
             var skip2 = c.DefineLabel();
-            if (c.TryGotoNext(
+            c.GotoNext(
                 x => x.MatchBr(out skip2),
                 x => x.MatchLdarg(0),
                 x => x.MatchCall<RoomCamera>("get_room"),
@@ -87,21 +87,17 @@ public static class HudHooks
                 x => x.MatchLdarg(0),
                 x => x.MatchLdfld<RoomCamera>("followAbstractCreature"),
                 x => x.MatchBrfalse(out var _)
-            ))
-            {
-                c.Index++;
-                c.MoveAfterLabels();
-                var skip = c.DefineLabel();
-                c.Emit(OpCodes.Ldarg_0);
-                c.EmitDelegate(ShouldInitHUD);
-                c.Emit(OpCodes.Brfalse, skip);
-                c.Emit(OpCodes.Ldarg_0);
-                c.EmitDelegate(InitStoryHud);
-                c.Emit(OpCodes.Br, skip2);
-                c.MarkLabel(skip);
-
-            }
-            else RainMeadow.RainMeadow.Error("Failed to load RoomCamera IL hook");
+            );
+            c.Index++;
+            c.MoveAfterLabels();
+            var skip = c.DefineLabel();
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate(ShouldInitHUD);
+            c.Emit(OpCodes.Brfalse, skip);
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate(InitStoryHud);
+            c.Emit(OpCodes.Br, skip2);
+            c.MarkLabel(skip);
         }
         catch (Exception ex)
         {
@@ -239,21 +235,16 @@ public static class HudHooks
         }
     }
 
-    public static void ReplaceAsPlayerHook(ILContext il)
-    {
-        var c = new ILCursor(il);
-        ReplaceAsPlayer(c);
-    }
-
     public static void ReplaceAsPlayer(ILCursor c)
     {
-        if (c.TryGotoNext(
-            x => x.MatchLdarg(0),
-            x => x.MatchLdfld<HudPart>(nameof(HudPart.hud)),
-            x => x.MatchLdfld<HUD.HUD>(nameof(HUD.HUD.owner)),
-            x => x.MatchIsinst<Player>()
-        ))
+        try
         {
+            c.GotoNext(
+                x => x.MatchLdarg(0),
+                x => x.MatchLdfld<HudPart>(nameof(HudPart.hud)),
+                x => x.MatchLdfld<HUD.HUD>(nameof(HUD.HUD.owner)),
+                x => x.MatchIsinst<Player>()
+            );
             c.MoveAfterLabels();
             c.Emit(OpCodes.Ldarg_0);
             c.EmitDelegate(HUDOwnerCreature);
@@ -263,11 +254,23 @@ public static class HudHooks
             c.Emit(OpCodes.Pop);
             c.GotoNext(MoveType.After, x => x.MatchIsinst<Player>());
             c.MarkLabel(skip);
-            StoryMenagerie.Debug("Player Isinst successfully replaced");
         }
-        else
+        catch (Exception ex)
         {
-            StoryMenagerie.LogError("Player Isinst was not replaced!");
+            StoryMenagerie.LogError(ex);
+        }
+    }
+
+    public static void ReplaceAsPlayerHook(ILContext il)
+    {
+        try
+        {
+            var c = new ILCursor(il);
+            ReplaceAsPlayer(c);
+        }
+        catch (Exception ex)
+        {
+            StoryMenagerie.LogError(ex);
         }
     }
 
@@ -375,24 +378,22 @@ public static class HudHooks
         try
         {
             var c = new ILCursor(il);
-            if (c.TryGotoNext(
+            c.GotoNext(
                 x => x.MatchLdarg(1),
                 x => x.MatchLdfld<HUD.HUD>(nameof(HUD.HUD.owner)),
                 x => x.MatchIsinst<Player>()
-            ))
-            {
-                c.MoveAfterLabels();
-                c.Emit(OpCodes.Ldarg_0);
-                c.EmitDelegate(HUDOwnerCreature);
-                c.Emit(OpCodes.Dup);
-                var skip = c.DefineLabel();
-                c.Emit(OpCodes.Brtrue, skip);
-                c.Emit(OpCodes.Pop);
-                c.GotoNext(MoveType.After, x => x.MatchIsinst<Player>());
-                c.MarkLabel(skip);
-                StoryMenagerie.Debug("Player Isinst successfully replaced");
-            }
-        } catch (Exception ex)
+            );
+            c.MoveAfterLabels();
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate(HUDOwnerCreature);
+            c.Emit(OpCodes.Dup);
+            var skip = c.DefineLabel();
+            c.Emit(OpCodes.Brtrue, skip);
+            c.Emit(OpCodes.Pop);
+            c.GotoNext(MoveType.After, x => x.MatchIsinst<Player>());
+            c.MarkLabel(skip);
+        }
+        catch (Exception ex)
         {
             StoryMenagerie.LogError(ex);
         }
@@ -567,30 +568,25 @@ public static class HudHooks
         try
         {
             var c = new ILCursor(il);
-            if (c.TryGotoNext(
+            c.GotoNext(
                 x => x.MatchLdarg(0),
                 x => x.MatchLdfld<HUD.HudPart>(nameof(HUD.HudPart.hud)),
                 x => x.MatchLdfld<HUD.HUD>(nameof(HUD.HUD.owner)),
                 x => x.MatchIsinst<Player>(),
                 x => x.MatchLdfld<Player>(nameof(Player.forceSleepCounter))
-            ))
-            {
-                c.MoveAfterLabels();
-                c.Emit(OpCodes.Ldarg_0);
-                c.EmitDelegate(UpdateForceSleep);
-                var skip = c.DefineLabel();
-                c.Emit(OpCodes.Brtrue, skip);
-                c.GotoNext(MoveType.After,
-                    x => x.MatchLdcR4(0.033333335f),
-                    x => x.MatchSub(),
-                    x => x.MatchCall(out var _),
-                    x => x.MatchStfld<FoodMeter>(nameof(FoodMeter.forceSleep))
-                );
-                c.MarkLabel(skip);
-            } else
-            {
-                StoryMenagerie.LogError("IL.FoodMeter.GameUpdate hook failed!");
-            }
+            );
+            c.MoveAfterLabels();
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate(UpdateForceSleep);
+            var skip = c.DefineLabel();
+            c.Emit(OpCodes.Brtrue, skip);
+            c.GotoNext(MoveType.After,
+                x => x.MatchLdcR4(0.033333335f),
+                x => x.MatchSub(),
+                x => x.MatchCall(out var _),
+                x => x.MatchStfld<FoodMeter>(nameof(FoodMeter.forceSleep))
+            );
+            c.MarkLabel(skip);
         }
         catch (Exception ex)
         {
