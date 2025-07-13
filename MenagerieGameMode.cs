@@ -21,7 +21,6 @@ public class MenagerieGameMode : StoryGameMode
     //public List<AbstractCreature> avatars = new List<AbstractCreature>();
     public int skinIndex;
     public bool secretMode;
-    public static Action<Creature, OnlineCreature, SlugcatCustomization> AvatarBinds = DefaultAvatarBinds;
     public List<AbstractCreature> abstractAvatars
     {
         get
@@ -242,76 +241,67 @@ public class MenagerieGameMode : StoryGameMode
         base.Customize(creature, oc);
         if (oc.TryGetData<SlugcatCustomization>(out var data))
         {
-            DefaultAvatarBinds(creature, oc, data);
-        }
-    }
-
-    public static void BindStoryAvatar(Creature creature, OnlineCreature oc, SlugcatCustomization customization)
-    {
-        if (AvatarBinds != null) AvatarBinds(creature, oc, customization);
-    }
-
-    public static void DefaultAvatarBinds(Creature creature, OnlineCreature oc, SlugcatCustomization customization)
-    {
-        if (creature is Lizard liz)
-        {
-            new Creatures.LizardController(liz, oc, 0, new CreatureCustomization(customization));
-        }
-        else if (creature is Scavenger scavy)
-        {
-            new Creatures.ScavengerController(scavy, oc, 0, new CreatureCustomization(customization));
-        }
-        else if (creature is NeedleWorm)
-        {
-            new Creatures.NoodleController(creature, oc, 0, new CreatureCustomization(customization));
-        }
-        else if (creature is EggBug bug)
-        {
-            new Creatures.EggbugController(bug, oc, 0, new CreatureCustomization(customization));
-        }
-        else if (creature is LanternMouse mouse)
-        {
-            new Creatures.LanternMouseController(mouse, oc, 0, new CreatureCustomization(customization));
-        }
-        else if (creature is Cicada cicada)
-        {
-            new Creatures.CicadaController(cicada, oc, 0, new CreatureCustomization(customization));
-        }
-        else if (creature is Centipede centi)
-        {
-            new Creatures.CentipedeController(centi, oc, 0, new CreatureCustomization(customization));
-        }
-        else if (ModManager.DLCShared && creature is MoreSlugcats.Yeek yeek)
-        {
-            new Creatures.YeekController(yeek, oc, 0, new CreatureCustomization(customization));
-        }
-        else if (ModManager.MSC && creature is Player player && player.isNPC)
-        {
-            new Creatures.SlugNPCController(player, oc, 0, new CreatureCustomization(customization));
-        }
-        else if (creature is JetFish fish)
-        {
-            new Creatures.JetFishController(fish, oc, 0, new CreatureCustomization(customization));
-        }
-        else if (creature is BigEel eel)
-        {
-            new Creatures.BigEelController(eel, oc, 0, new CreatureCustomization(customization));
-        }
-        else if (creature is DaddyLongLegs dll)
-        {
-            new Creatures.LongLegsController(dll, oc, 0, new CreatureCustomization(customization));
-        }
-        else if (creature is DropBug dropbug)
-        {
-            new Creatures.DropBugController(dropbug, oc, 0, new CreatureCustomization(customization));
-        }
-        else if (creature is Watcher.Barnacle barnacle)
-        {
-            new Creatures.BarnacleController(barnacle, oc, 0, new CreatureCustomization(customization));
-        }
-        else if (creature is not Player)
-        {
-            throw new InvalidProgrammerException("You need to implement " + creature.ToString());
+            RainMeadow.RainMeadow.creatureCustomizations.GetValue(creature, (c) => data);
+            if (creature is Lizard liz)
+            {
+                new Creatures.LizardController(liz, oc, 0, new CreatureCustomization(data));
+            }
+            else if (creature is Scavenger scavy)
+            {
+                new Creatures.ScavengerController(scavy, oc, 0, new CreatureCustomization(data));
+            }
+            else if (creature is NeedleWorm)
+            {
+                new Creatures.NoodleController(creature, oc, 0, new CreatureCustomization(data));
+            }
+            else if (creature is EggBug bug)
+            {
+                new Creatures.EggbugController(bug, oc, 0, new CreatureCustomization(data));
+            }
+            else if (creature is LanternMouse mouse)
+            {
+                new Creatures.LanternMouseController(mouse, oc, 0, new CreatureCustomization(data));
+            }
+            else if (creature is Cicada cicada)
+            {
+                new Creatures.CicadaController(cicada, oc, 0, new CreatureCustomization(data));
+            }
+            else if (creature is Centipede centi)
+            {
+                new Creatures.CentipedeController(centi, oc, 0, new CreatureCustomization(data));
+            }
+            else if (ModManager.DLCShared && creature is MoreSlugcats.Yeek yeek)
+            {
+                new Creatures.YeekController(yeek, oc, 0, new CreatureCustomization(data));
+            }
+            else if (ModManager.MSC && creature is Player player && player.isNPC)
+            {
+                new Creatures.SlugNPCController(player, oc, 0, new CreatureCustomization(data));
+            }
+            else if (creature is JetFish fish)
+            {
+                new Creatures.JetFishController(fish, oc, 0, new CreatureCustomization(data));
+            }
+            else if (creature is BigEel eel)
+            {
+                new Creatures.BigEelController(eel, oc, 0, new CreatureCustomization(data));
+            }
+            else if (creature is DaddyLongLegs dll)
+            {
+                new Creatures.LongLegsController(dll, oc, 0, new CreatureCustomization(data));
+            }
+            else if (creature is DropBug dropbug)
+            {
+                new Creatures.DropBugController(dropbug, oc, 0, new CreatureCustomization(data));
+            }
+            else if (creature is Watcher.Barnacle barnacle)
+            {
+                new Creatures.BarnacleController(barnacle, oc, 0, new CreatureCustomization(data));
+            }
+            else if (creature is not Player)
+            {
+                throw new InvalidProgrammerException("You need to implement " + creature.ToString());
+            }
         }
     }
 

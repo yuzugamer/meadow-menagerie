@@ -2015,20 +2015,6 @@ public static class StoryHooks
         return self.voidSea.room.game.FirstRealizedPlayer;
     }
 
-    public static bool ReplaceVoidWormPlayer(ILCursor c, int ldloc)
-    {
-        if (c.TryGotoNext(
-            MoveType.After,
-            x => x.MatchLdloc(ldloc)
-        ))
-        {
-            c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate(VoidWormPlayer);
-            return true;
-        }
-        return false;
-    }
-
     public static bool ReplaceVoidWormBehaviorPlayer(ILCursor c, int ldloc)
     {
         if (c.TryGotoNext(
