@@ -178,7 +178,7 @@ public class MenagerieGameMode : StoryGameMode
     public override void LobbyTick(uint tick)
     {
         clientSettings.avatars = avatars.Select(a => a.id).ToList();
-        //storyClientData.isDead = avatars.All(a => a.abstractCreature.state.dead || (a.realizedCreature != null && CreatureController.creatureControllers.TryGetValue(a.realizedCreature, out var crit) && crit.isStory(out var scc) && scc.dangerGraspTime >= 60) || (a.abstractCreature.state is PlayerState state && state.permaDead));
+        storyClientData.isDead = avatars.All(a => a.abstractCreature.state.dead || (a.abstractCreature.state is PlayerState state && (state.dead || state.permaDead)));
         var devTools = RWCustom.Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game && game.devToolsActive;
 
         if (lobby.isOwner && lobby.clientSettings.Values.Where(cs => cs.inGame) is var inGameClients && inGameClients.Any())
