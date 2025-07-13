@@ -156,7 +156,7 @@ namespace StoryMenagerie.Creatures
                 Vector2 aimPosition = this.scavenger.mainBodyChunk.pos + new Vector2(this.scavenger.flip * 250f, (this.scavenger.flip * 125f) * input[0].y);
                 var personality = scavenger.abstractCreature.personality;
                 scavenger.abstractCreature.personality = StoryMenagerie.GamerPersonality;
-                if (scavenger.animation.id != Scavenger.ScavengerAnimation.ID.ThrowCharge)
+                if (scavenger.animation == null || scavenger.animation.id != Scavenger.ScavengerAnimation.ID.ThrowCharge)
                 {
                     scavenger.animation = new Scavenger.ThrowChargeAnimation(scavenger, null);
                     scavenger.animation.age = 0;
@@ -195,7 +195,9 @@ namespace StoryMenagerie.Creatures
             }
             else if (input[0].y > 0 && input[1].y <= 0)
             {
-                scavenger.movMode = Scavenger.MovementMode.StandStill;
+                scavenger.animation = null;
+                scavenger.movMode = Scavenger.MovementMode.Run;
+                scavenger.moveModeChangeCounter = -5;
             }
 
             if (input[0].spec)
